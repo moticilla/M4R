@@ -13,14 +13,15 @@ w_var = 1.3
 c = 3.61
 t_set = np.arange(0, t_max, delta_t)
 position = np.zeros((len(t_set), n, 2))
-position[0,:,0] = randrange(1,3)
-position[0,:,1] = randrange(1,3)
+for i in range(n):
+    position[0,i,0] = randrange(1,3)
+    position[0,i,1] = randrange(1,3)
 phi = np.zeros((len(t_set),n))
 r = np.zeros((len(t_set),n))
 def d(i,p,t):
     return np.sqrt((position[t][p][0]-position[t][i][0])**2 + (position[t][p][1]-position[t][i][1])**2)
 def angle(i,p,t):
-    return phi[t][p]-phi[t][i]
+    return phi[t,p]-phi[t,i]
 def w(i,p,t):
     dis = d(i,p,t)
     return ( a/(np.exp(w_var * dis + a)) )
