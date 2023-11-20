@@ -11,25 +11,36 @@ a = 9.2
 w_var = 1.3
 c = 3.61
 t_set = np.arange(0, t_max, delta_t)
-r = np.zeros((len(t_set), n, 2))
-r[:][:][0] = randrange(1,3)
+position = np.zeros((len(t_set), n, 2))
+position[0][:][0] = randrange(1,3)
+position[0][:][1] = randrange(1,3)
 phi = np.zeros((len(t_set),n))
+r = np.zeros((len(t_set),n))
 def d(i,p,t):
-    return np.sqrt((r[t][p][0]-r[t][i][0])**2 + (r[t][p][1]-r[t][i][1])**2)
+    return np.sqrt((position[t][p][0]-position[t][i][0])**2 + (position[t][p][1]-position[t][i][1])**2)
 def angle(i,p,t):
     return phi[t][p]-phi[t][i]
 def w(i,p,t):
     dis = d(i,p,t)
     return ( a/(np.exp(w_var * dis + a)) )
 
-myArray = np.array([[[1,2],[1,2],[1,2]],[[1,2],[1,2],[1,2]],[[1,2],[1,2],[1,2]],[[1,2],[1,2],[1,2]]])
-#print(np.shape(myArray))
+#print(r)
 
-for t in range(len(t_set)-1):
+for t in range(1, len(t_set)):
     for p in range(n):
         for i in range(n):
-            dis = d(i,p,t)
-            ang = angle(i,p,t)
-            if (dis< d_max) and (np.absolute(ang)<angle_max):
-                w_i = w(i,p,t)
-                phi[t+1][p] = phi[t][p] - delta_t* (k/n) * w_i * np.sin(phi[t][i] - phi[t][p])
+            localN = 0
+            phi_sum = 0
+            r_sum = 0
+            dis = d(i,p,t-1)
+            ang = angle(i,p,t-1)
+            if (dis< d_max) and (np.absolute(ang)<angle_max) and (i != p):
+                localN += 1
+                w_i = w(i,p,t-1)
+                phi_sum += w_i * np.sin(phi[t-1][i] - phi[t-1][p])
+                r_sum           += w_i *(r[t-1][i]-r[t-1][p])
+        r[t][p]   = r[t-1][p] + delta_t * (c/localN) * r_sum
+        phi[t][p] = phi[t-1][p] - delta_t * (k/localN) * phi_sum
+        distance = r * delta_t
+        position[t][p][0] = position[t-1][p][0] + distance*np.cos(phi[t-1][p])
+        position[t][p][1] = position[t-1][p][1] + distance*np.sin(phi[t-1][p])
