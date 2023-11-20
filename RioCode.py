@@ -1,5 +1,6 @@
 from random import randrange
 import numpy as np
+import matplotlib.pyplot as plt
 #Variables:
 delta_t = 0.2
 t_max = 5
@@ -12,8 +13,8 @@ w_var = 1.3
 c = 3.61
 t_set = np.arange(0, t_max, delta_t)
 position = np.zeros((len(t_set), n, 2))
-position[0][:][0] = randrange(1,3)
-position[0][:][1] = randrange(1,3)
+position[0,:,0] = randrange(1,3)
+position[0,:,1] = randrange(1,3)
 phi = np.zeros((len(t_set),n))
 r = np.zeros((len(t_set),n))
 def d(i,p,t):
@@ -28,6 +29,8 @@ def w(i,p,t):
 
 for t in range(1, len(t_set)):
     for p in range(n):
+        r[t][p]   = r[t-1][p]
+        phi[t][p] = phi[t-1][p]
         for i in range(n):
             localN = 0
             phi_sum = 0
@@ -39,8 +42,16 @@ for t in range(1, len(t_set)):
                 w_i = w(i,p,t-1)
                 phi_sum += w_i * np.sin(phi[t-1][i] - phi[t-1][p])
                 r_sum           += w_i *(r[t-1][i]-r[t-1][p])
-        r[t][p]   = r[t-1][p] + delta_t * (c/localN) * r_sum
-        phi[t][p] = phi[t-1][p] - delta_t * (k/localN) * phi_sum
+        if localN >0:
+            r[t][p]   = r[t-1][p] + delta_t * (c/localN) * r_sum
+            phi[t][p] = phi[t-1][p] - delta_t * (k/localN) * phi_sum
         distance = r * delta_t
-        position[t][p][0] = position[t-1][p][0] + distance*np.cos(phi[t-1][p])
-        position[t][p][1] = position[t-1][p][1] + distance*np.sin(phi[t-1][p])
+        position[t][p][0] = position[t-1][p][0] + distance[t-1][p]*np.cos(phi[t-1][p])
+        position[t][p][1] = position[t-1][p][1] + distance[t-1][p]*np.sin(phi[t-1][p])
+plt.plot(position[:][1][0],position[:][1][1] )
+print(position[:][1][0])
+print(len(t_set))
+print(np.shape(position))
+#plt.show()
+print(position.max(),position.min(),position[:,0,0])
+print(position[:][0][0])
