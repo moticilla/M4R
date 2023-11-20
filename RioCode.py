@@ -20,6 +20,6 @@ def w(i,p,t):
 for p in range(n):
     for t in range(len(t_set)):
         for i in range(n):
-            w_i = w(i,p)
-            phi[p][t+1] = phi[p][t] - delta_t* k/n * w_i * np.sin(phi[i][t] - phi[p][t])
-        r[1][p][t+1] = r[1][p][t] 
+            if d(i,p,t)<4:
+                w_i = w(i,p,t)
+                phi[p][t+1] = phi[p][t] - delta_t* (k/n) * w_i * np.sin(phi[i][t] - phi[p][t])
