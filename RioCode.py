@@ -1,4 +1,4 @@
-from random import randrange
+from random import randrange, random
 import numpy as np
 import matplotlib.pyplot as plt
 #Variables:
@@ -14,8 +14,8 @@ c = 3.61
 t_set = np.arange(0, t_max, delta_t)
 position = np.zeros((len(t_set), n, 2))
 for i in range(n):
-    position[0,i,0] = randrange(1,3)
-    position[0,i,1] = randrange(1,3)
+    position[0,i,0] = 3* random()
+    position[0,i,1] = 3*random()
 phi = np.zeros((len(t_set),n))
 r = np.zeros((len(t_set),n))
 def d(i,p,t):
