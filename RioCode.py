@@ -13,11 +13,13 @@ w_var = 1.3
 c = 3.61
 t_set = np.arange(0, t_max, delta_t)
 position = np.zeros((len(t_set), n, 2))
+phi = np.zeros((len(t_set),n))
+r = np.zeros((len(t_set),n))
 for i in range(n):
     position[0,i,0] = 3* random()
     position[0,i,1] = 3*random()
-phi = np.zeros((len(t_set),n))
-r = np.zeros((len(t_set),n))
+    phi[0,i] = 3* random()
+    r[0,i] = 3* random()
 def d(i,p,t):
     return np.sqrt((position[t,p,0]-position[t,i,0])**2 + (position[t,p,1]-position[t,i,1])**2)
 def angle(i,p,t):
@@ -38,13 +40,14 @@ for t in range(1, len(t_set)):
             r_sum = 0
             dis = d(i,p,t-1)
             ang = angle(i,p,t-1)
-            if (dis< d_max) and (np.absolute(ang)<angle_max) and (i != p):#the angle condition is wrong
+            #if (dis< d_max) and (np.absolute(ang)<angle_max) and (i != p):#the angle condition is wrong
+            if (dis< d_max) and (i != p):
                 localN += 1
                 w_i = w(i,p,t-1)
                 phi_sum += w_i * np.sin(phi[t-1,i] - phi[t-1,p])
-                r_sum           += w_i *(r[t-1,i]-r[t-1,p])
+                r_sum   += w_i *(r[t-1,i]-r[t-1,p])
         if localN >0:
-            r[t,p]   = r[t-1,p] + delta_t * (c/localN) * r_sum
+            r[t,p]   = r[t-1,p]   + delta_t * (c/localN) * r_sum
             phi[t,p] = phi[t-1,p] - delta_t * (k/localN) * phi_sum
         distance = r * delta_t
         position[t,p,0] = position[t-1,p,0] + distance[t-1,p]*np.cos(phi[t-1,p])
