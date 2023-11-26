@@ -19,7 +19,7 @@ for i in range(n):
     position[0,i,0] = 0.5*random()
     position[0,i,1] = 0.5*random()
     phi[0,i] = 3* random()
-    r[0,i] = 0.5* random()
+    r[0,i] = 0.3* random()
 def d(i,p,t):
     return np.sqrt((position[t,p,0]-position[t,i,0])**2 + (position[t,p,1]-position[t,i,1])**2)
 def angle(i,p,t):
@@ -41,8 +41,7 @@ for t in range(1, len(t_set)):
             #if (dis< d_max) and (np.absolute(ang)<angle_max) and (i != p):#the angle condition is wrong
             if (dis< d_max) and (i != p):
                 localN  += 1
-                w_i      = w(i,p,t-1) #why is w_i so small?
-                #print(w_i)
+                w_i      = w(i,p,t-1)
                 phi_sum += w_i * np.sin(phi[t-1,i] - phi[t-1,p])
                 r_sum   += w_i *(r[t-1,i]-r[t-1,p])
         if localN > 0:
@@ -52,8 +51,8 @@ for t in range(1, len(t_set)):
         position[t,p,0] = position[t-1,p,0] + distance[t-1,p]*np.cos(phi[t-1,p])
         position[t,p,1] = position[t-1,p,1] + distance[t-1,p]*np.sin(phi[t-1,p])
 
-plt.scatter(position[:,0,0],position[:,0,1] )
-plt.scatter(position[:,1,0],position[:,1,1] )
-plt.scatter(position[:,2,0],position[:,2,1] )
+plt.scatter(position[:,0,0],position[:,0,1])
+plt.scatter(position[:,1,0],position[:,1,1])
+plt.scatter(position[:,2,0],position[:,2,1])
 plt.show()
 #print(position[:,0,:])
