@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 #Variables:
 delta_t = 0.2
 t_max = 6
-n = 10
+n = 3
 d_max = 4
 angle_max = 1.57 #pi/2
 k = 3.15
@@ -51,15 +51,16 @@ for t in range(1, len(t_set)):
         position[t,p,0] = position[t-1,p,0] + distance[t-1,p]*np.cos(phi[t-1,p])
         position[t,p,1] = position[t-1,p,1] + distance[t-1,p]*np.sin(phi[t-1,p])
 
-#for i in range(n):
-#    plt.scatter(position[:,i,0],position[:,i,1])
+for i in range(n):
+    plt.scatter(position[:,i,0],position[:,i,1])
 my_quiver = np.zeros((len(t_set), n, 2))
 for t in range(len(t_set)-1):
     for p in range(n):
-        my_quiver[t,p,0] = position[t,p,0] - position[t+1,p,0]
-        my_quiver[t,p,1] = position[t,p,1] - position[t+1,p,1]
+        my_quiver[t,p,0] = -position[t,p,0] + position[t+1,p,0]
+        my_quiver[t,p,1] = -position[t,p,1] + position[t+1,p,1]
+my_quiver = my_quiver/200
 for i in range(n):
-    plt.quiver([position[:,i,0],position[:,i,1]],my_quiver[0],my_quiver[1])
+    plt.quiver(position[::4,i,0], position[::4,i,1],my_quiver[::4,i,0], my_quiver[::4,i,1], units = 'width')
 
 plt.show()
 #print(position[:,0,:])
