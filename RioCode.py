@@ -53,9 +53,13 @@ for t in range(1, len(t_set)):
 
 #for i in range(n):
 #    plt.scatter(position[:,i,0],position[:,i,1])
-
+my_quiver = np.zeros((len(t_set), n, 2))
+for t in range(len(t_set)-1):
+    for p in range(n):
+        my_quiver[t,p,0] = position[t,p,0] - position[t+1,p,0]
+        my_quiver[t,p,1] = position[t,p,1] - position[t+1,p,1]
 for i in range(n):
-    plt.scatter(position[:,i,0],position[:,i,1])
+    plt.quiver([position[:,i,0],position[:,i,1]],my_quiver[0],my_quiver[1])
 
 plt.show()
 #print(position[:,0,:])
