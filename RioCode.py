@@ -1,10 +1,11 @@
 from random import randrange, random
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 #Variables:
 delta_t = 0.2
 t_max = 6
-n = 3
+n = 7
 d_max = 4
 angle_max = 1.57 #pi/2
 k = 3.15
@@ -62,5 +63,10 @@ my_quiver = my_quiver/200
 for i in range(n):
     plt.quiver(position[::4,i,0], position[::4,i,1],my_quiver[::4,i,0], my_quiver[::4,i,1], units = 'width')
 
-plt.show()
-#print(position[:,0,:])
+#plt.show()
+
+#read in data from the paper
+data = pd.read_csv('/home/ellie/Documents/M4R/Exp1_LateralDeviation_strip.txt', sep="\s+", 
+                   header=None, skiprows = [0,1,12,13,15,16,17,18,19,31,32,33,34,35,46,47,48])
+data.columns = ["Subject", "Near 0", "Far 0", "Near 3", "Near 6", "Near 9", "Near 12", "Far 3", "Far 6", "Far 9", "Far 12"]
+print(data)
