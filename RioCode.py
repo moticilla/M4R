@@ -2,6 +2,7 @@ from random import randrange, random
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+from scipy import special
 #Variables:
 delta_t = 0.2
 t_max = 6
@@ -29,6 +30,8 @@ def angle(i,p,t):
 def w(i,p,t):
     dis = d(i,p,t)
     return ( a/(np.exp(w_var * dis)+a) )
+def ogive(mu, sigma,t):
+    return 0.5 *(1+special.erf((t-mu)/sigma*np.sqrt(2)))
 
 for t in range(1, len(t_set)):
     for p in range(n):
@@ -40,7 +43,7 @@ for t in range(1, len(t_set)):
         for i in range(n):
             dis     = d(i,p,t-1)
             ang     = angle(i,p,t-1)
-            if (dis< d_max) and (np.absolute(ang)<angle_max) and (i != p):#the angle condition is wrong
+            if (dis< d_max) and (np.absolute(ang)<angle_max) and (i != p):#need to check but I think the angle is right now
                 localN  += 1
                 w_i      = w(i,p,t-1)
                 phi_sum += w_i * np.sin(phi[t-1,i] - phi[t-1,p])
@@ -66,7 +69,8 @@ for i in range(n):
 #plt.show()
 
 #read in data from the paper
-exp1_LateralDeviation_strip = pd.read_csv('/home/ellie/Documents/M4R/Exp1_LateralDeviation_strip.txt', sep="\s+", skip_blank_lines=True, 
+exp1_LateralDeviation_strip = pd.read_csv('/home/ellie/Documents/M4R/exp1/Exp1_LateralDeviation_strip.txt', sep="\s+", skip_blank_lines=True, 
                    header=None, skiprows = [0,1,12,15,16,17,18, 29,32,33,34,35,46])
 exp1_LateralDeviation_strip.columns = ["Subject", "Near 0", "Far 0", "Near 3", "Near 6", "Near 9", "Near 12", "Far 3", "Far 6", "Far 9", "Far 12"]
+exp1_LateralDeviation_strip.drop([10,13,14,25,28,29,40])
 #print(exp1_LateralDeviation_strip)
