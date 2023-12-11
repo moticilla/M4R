@@ -1,4 +1,4 @@
-from random import randrange, random
+from random import random, choice
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -28,6 +28,14 @@ def w(i,p,t):
     return ( a/(np.exp(w_var * dis)+a) )
 def ogive(mu, sigma,t):
     return 0.5 *(1+special.erf((t-mu)/sigma*np.sqrt(2)))
+def perturb(S, t, Heading = True, Speed = False):
+    #S is the set of virtual neighbours to eb perturbed either by speed or by direction
+    sign = choice([1,-1])
+    for i in range(int(0.5//delta_t)):
+        if Heading == True:
+            phi[t+i] = phi[t] + sign*ogive(0,0.083,i)
+        if Speed == True:
+            r[t+i] = r[t] + sign*ogive(0,0.083,i)
 
 #set position of 12 neighbours for exp1
 for i in range(14):
@@ -43,14 +51,14 @@ for i in range(14,30):
 
 #make all virtual people speed up to 1.3m/s in 3 s
 for i in range(3):
-    for t in range(3/delta_t):
+    for t in range(int(3//delta_t)):
         r[t,i] = ogive(0,0.5,t)
 '''
 for i in range(n):
-    position[0,i,0] = 0.5*random()
-    position[0,i,1] = 0.5*random()
-    phi[0,i] = 3* random()
-    r[0,i]   = 0.3* random()'''
+    position[0,i,0] = 0.5*random.random()
+    position[0,i,1] = 0.5*random.random()
+    phi[0,i] = 3* random.random()
+    r[0,i]   = 0.3* random.random()'''
 
 
 for t in range(1, len(t_set)):
