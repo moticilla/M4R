@@ -69,4 +69,4 @@ for i in range(n):
 exp1_LateralDeviation_strip = pd.read_csv('/home/ellie/Documents/M4R/Exp1_LateralDeviation_strip.txt', sep="\s+", skip_blank_lines=True, 
                    header=None, skiprows = [0,1,12,15,16,17,18, 29,32,33,34,35,46])
 exp1_LateralDeviation_strip.columns = ["Subject", "Near 0", "Far 0", "Near 3", "Near 6", "Near 9", "Near 12", "Far 3", "Far 6", "Far 9", "Far 12"]
-print(exp1_LateralDeviation_strip)
+#print(exp1_LateralDeviation_strip)
