@@ -33,9 +33,9 @@ def perturb(S, t, Heading = True, Speed = False):
     sign = choice([1,-1])
     for i in range(int(0.5//delta_t)):
         if Heading == True:
-            phi[t+i] = phi[t] + sign*ogive(0,0.083,i)
+            phi[t+i] = phi[t] + sign*(10/360)*2*pi*ogive(0,0.083,i*delta_t-0.25)
         if Speed == True:
-            r[t+i] = r[t] + sign*ogive(0,0.083,i)
+            r[t+i] = r[t] + 0.3*sign*ogive(0,0.083,i*delta_t-0.25)
 
 #set position of 12 neighbours for exp1
 for i in range(14):
@@ -52,14 +52,14 @@ for i in range(14,30):
 #make all virtual people speed up to 1.3m/s in 3 s
 for i in range(3):
     for t in range(int(3//delta_t)):
-        r[t,i] = ogive(0,0.5,t)
+        r[t,i] = ogive(0,0.5,t*delta_t - 1.5)
 '''
 for i in range(n):
     position[0,i,0] = 0.5*random.random()
     position[0,i,1] = 0.5*random.random()
     phi[0,i] = 3* random.random()
-    r[0,i]   = 0.3* random.random()'''
-
+    r[0,i]   = 0.3* random.random()
+'''
 
 for t in range(1, len(t_set)):
     for p in range(n):
@@ -94,7 +94,7 @@ my_quiver = my_quiver/200
 for i in range(n):
     plt.quiver(position[::4,i,0], position[::4,i,1],my_quiver[::4,i,0], my_quiver[::4,i,1], units = 'width')
 
-#plt.show()
+plt.show()
 
 #read in data from the paper
 exp1_LateralDeviation_strip = pd.read_csv('/home/ellie/Documents/M4R/exp1/Exp1_LateralDeviation_strip.txt', sep="\s+", skip_blank_lines=True, 
@@ -103,3 +103,8 @@ exp1_LateralDeviation_strip.columns = ["Subject", "Near 0", "Far 0", "Near 3", "
 exp1_LateralDeviation_strip.drop([10,13,14,25,28,29,40], axis = 0)
 #print(exp1_LateralDeviation_strip)
 #multiply left turn by -1 and add to right turns
+
+x = np.linspace(-1.5, 1.5)
+plt.plot(x, ogive(0,0.5,x))
+
+plt.show()
