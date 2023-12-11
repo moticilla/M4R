@@ -5,8 +5,8 @@ import pandas as pd
 from scipy import special
 #Variables:
 delta_t = 0.2
-t_max = 6
-n = 12
+t_max = 60
+n = 30
 d_max = 4
 pi = 3.14
 angle_max = pi/2
@@ -18,23 +18,6 @@ t_set    = np.arange(0, t_max, delta_t)
 position = np.zeros((len(t_set), n, 2))
 phi      = np.zeros((len(t_set),n))
 r        = np.zeros((len(t_set),n))
-#set position of 12 neighbours
-for i in range(5):
-    position[0,i,0] = 1.5*np.sin(pi/4 + i*pi/8)
-    position[0,i,1] = 1.5*np.cos(pi/4 + i*pi/8)
-for i in range(5,12):    
-    position[0,i,0] = 3.5*np.sin(pi/4 + (i-5)*pi/12)
-    position[0,i,1] = 3.5*np.cos(pi/4 + (i-5)*pi/12)
-print(position[0,:,:])
-plt.scatter(position[0,:,0], position[0,:,1])
-plt.show()
-
-'''
-for i in range(n):
-    position[0,i,0] = 0.5*random()
-    position[0,i,1] = 0.5*random()
-    phi[0,i] = 3* random()
-    r[0,i]   = 0.3* random()'''
 def d(i,p,t):
     return np.sqrt((position[t,p,0]-position[t,i,0])**2 + (position[t,p,1]-position[t,i,1])**2)
 def angle(i,p,t):
@@ -45,6 +28,30 @@ def w(i,p,t):
     return ( a/(np.exp(w_var * dis)+a) )
 def ogive(mu, sigma,t):
     return 0.5 *(1+special.erf((t-mu)/sigma*np.sqrt(2)))
+
+#set position of 12 neighbours for exp1
+for i in range(14):
+    position[0,i,0] = 1.5*np.sin(pi/4 + i*pi/7)
+    position[0,i,1] = 1.5*np.cos(pi/4 + i*pi/7)
+for i in range(14,30):    
+    position[0,i,0] = 3.5*np.sin(pi/4 + (i-14)*pi/8)
+    position[0,i,1] = 3.5*np.cos(pi/4 + (i-14)*pi/8)
+#plt.scatter(position[0,:,0], position[0,:,1])
+#plt.show()
+
+#make the 18 neighbours not in the origional view jitter
+
+#make all virtual people speed up to 1.3m/s in 3 s
+for i in range(3):
+    for t in range(3/delta_t):
+        r[t,i] = ogive(0,0.5,t)
+'''
+for i in range(n):
+    position[0,i,0] = 0.5*random()
+    position[0,i,1] = 0.5*random()
+    phi[0,i] = 3* random()
+    r[0,i]   = 0.3* random()'''
+
 
 for t in range(1, len(t_set)):
     for p in range(n):
