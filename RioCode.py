@@ -1,4 +1,4 @@
-from random import random, choice
+from random import random, choice, normalvariate
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -29,7 +29,7 @@ def w(i,p,t):
 def ogive(mu, sigma,t):
     return 0.5 *(1+special.erf((t-mu)/sigma*np.sqrt(2)))
 def perturb(S, t, Heading = True, Speed = False):
-    #S is the set of virtual neighbours to eb perturbed either by speed or by direction
+    #S is the set of virtual neighbours to be perturbed either by speed or by direction
     sign = choice([1,-1])
     for i in range(int(0.5//delta_t)):
         if Heading == True:
@@ -37,17 +37,26 @@ def perturb(S, t, Heading = True, Speed = False):
         if Speed == True:
             r[t+i] = r[t] + 0.3*sign*ogive(0,0.083,i*delta_t-0.25)
 
-#set position of 12 neighbours for exp1
+#set position of 30 neighbours for experiment 1 in two circles
 for i in range(14):
-    position[0,i,0] = 1.5*np.sin(pi/4 + i*pi/7)
-    position[0,i,1] = 1.5*np.cos(pi/4 + i*pi/7)
+    position[0,i,0] = 1.5*np.sin(i*pi/7)
+    position[0,i,1] = 1.5*np.cos(i*pi/7)
 for i in range(14,30):    
-    position[0,i,0] = 3.5*np.sin(pi/4 + (i-14)*pi/8)
-    position[0,i,1] = 3.5*np.cos(pi/4 + (i-14)*pi/8)
-#plt.scatter(position[0,:,0], position[0,:,1])
-#plt.show()
+    position[0,i,0] = 3.5*np.sin((i-14)*pi/8)
+    position[0,i,1] = 3.5*np.cos((i-14)*pi/8)
+plt.scatter(position[0,:,0], position[0,:,1])
+for i in range(30):
+    plt.annotate(i, (position[0,i,0], position[0,i,1]))
+plt.show()
 
 #make the 18 neighbours not in the origional view jitter
+for t in range(1, len(t_set)):
+    for i in range(3,12):
+        position[t,i,0] = normalvariate(1.5,0.15)*np.sin(normalvariate(i*pi/7,(8/360)*2*pi))
+        position[t,i,1] = normalvariate(1.5,0.15)*np.cos(normalvariate(i*pi/7,(8/360)*2*pi))
+    for i in range(18,28):
+        position[t,i,0] = normalvariate(3.5,0.15)*np.sin(normalvariate((i-14)*pi/8,(8/360)*2*pi))
+        position[t,i,1] = normalvariate(3.5,0.15)*np.cos(normalvariate((i-14)*pi/8,(8/360)*2*pi))
 
 #make all virtual people speed up to 1.3m/s in 3 s
 for i in range(3):
@@ -94,7 +103,7 @@ my_quiver = my_quiver/200
 for i in range(n):
     plt.quiver(position[::4,i,0], position[::4,i,1],my_quiver[::4,i,0], my_quiver[::4,i,1], units = 'width')
 
-plt.show()
+#plt.show()
 
 #read in data from the paper
 exp1_LateralDeviation_strip = pd.read_csv('/home/ellie/Documents/M4R/exp1/Exp1_LateralDeviation_strip.txt', sep="\s+", skip_blank_lines=True, 
@@ -102,9 +111,3 @@ exp1_LateralDeviation_strip = pd.read_csv('/home/ellie/Documents/M4R/exp1/Exp1_L
 exp1_LateralDeviation_strip.columns = ["Subject", "Near 0", "Far 0", "Near 3", "Near 6", "Near 9", "Near 12", "Far 3", "Far 6", "Far 9", "Far 12"]
 exp1_LateralDeviation_strip.drop([10,13,14,25,28,29,40], axis = 0)
 #print(exp1_LateralDeviation_strip)
-#multiply left turn by -1 and add to right turns
-
-x = np.linspace(-1.5, 1.5)
-plt.plot(x, ogive(0,0.5,x))
-
-plt.show()
