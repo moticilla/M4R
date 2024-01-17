@@ -31,21 +31,20 @@ def ogive(mu, sigma,t):
 def perturb(S, t, Heading = True, Speed = False):
     #S is the set of virtual neighbours to be perturbed either by speed or by heading at time t
     sign = choice([1,-1])
-    for ii in S:
-        i = S[ii]
+    for i in S:
         for t_step in range(int(0.5//delta_t)):
             if Heading == True:
-                phi[t+t_step,i] = phi[t,i] + sign*(10/360)*2*pi*ogive(0,0.083,t_step*delta_t-0.25)
+                phi[t+t_step,i] = phi[t,i] + sign*(10/360)*2*pi*ogive(t,0.083,t_step*delta_t-0.25)
             if Speed   == True:
-                r[t+t_step,i]   = r[t,i]   + sign*0.3*ogive(0,0.083,t_step*delta_t-0.25)
+                r[t+t_step,i]   = r[t,i]   + sign*0.3*ogive(t,0.083,t_step*delta_t-0.25)
 
 #set position of 30 neighbours for experiment 1 in two circles with real person in the middle
 for i in range(14):
-    position[0,i,0] = 1.5*np.sin(i*pi/7)
-    position[0,i,1] = 1.5*np.cos(i*pi/7)
-for i in range(14,30):    
-    position[0,i,0] = 3.5*np.sin((i-14)*pi/8)
-    position[0,i,1] = 3.5*np.cos((i-14)*pi/8)
+    position[0,i,0] = normalvariate(1.5,0.15)*np.sin(normalvariate(i*pi/7,(8/360)*2*pi))
+    position[0,i,1] = normalvariate(1.5,0.15)*np.cos(normalvariate(i*pi/7,(8/360)*2*pi))
+for i in range(14,30):
+    position[0,i,0] = normalvariate(3.5,0.15)*np.sin(normalvariate((i-14)*pi/8,(8/360)*2*pi))
+    position[0,i,1] = normalvariate(3.5,0.15)*np.cos(normalvariate((i-14)*pi/8,(8/360)*2*pi))
 position[0,30,0] = 0
 position[0,30,1] = 0
 #plt.scatter(position[0,:,0], position[0,:,1])
@@ -53,27 +52,19 @@ position[0,30,1] = 0
 #    plt.annotate(i, (position[0,i,0], position[0,i,1]))
 #plt.show()
 
-#make the 18 neighbours not in the origional view jitter
-for t in range(1, len(t_set)):
-    for i in range(3,12):
-        position[t,i,0] = normalvariate(1.5,0.15)*np.sin(normalvariate(i*pi/7,(8/360)*2*pi))
-        position[t,i,1] = normalvariate(1.5,0.15)*np.cos(normalvariate(i*pi/7,(8/360)*2*pi))
-    for i in range(18,28):
-        position[t,i,0] = normalvariate(3.5,0.15)*np.sin(normalvariate((i-14)*pi/8,(8/360)*2*pi))
-        position[t,i,1] = normalvariate(3.5,0.15)*np.cos(normalvariate((i-14)*pi/8,(8/360)*2*pi))
-
 #make all virtual people speed up to 1.3m/s in 3 s
 for i in range(30):
     for t in range(int(3//delta_t)):
         r[t,i] = ogive(0,0.5,t*delta_t - 1.5)
 
 #define subset S for experiment 1
-#either 0,3,6,9,12
-S = np.array([0,1,2])
+#either 0,3,6,9,12 neighbours in S
+S = np.array([0,1,28,5,7,12])
 
 #make the perturbed set speed up after total of 5 seconds
-perturb(S, 5, Heading = True, Speed = True)
-
+perturb(S, 5, Heading = True, Speed = False)
+print(phi[:,0])
+print(phi[:,1])
 #get position of virtual neighbours from the perturbed speed and heading
 for t in range(1, len(t_set)):
     for p in range(n):
@@ -81,6 +72,30 @@ for t in range(1, len(t_set)):
             position[t,p,0] = position[t-1,p,0] + distance[t-1,p]*np.cos(phi[t-1,p])
             position[t,p,1] = position[t-1,p,1] + distance[t-1,p]*np.sin(phi[t-1,p])
 
+#end trial after participant has walked 12m condition
+
+#move the "real" person
+for t in range(1, len(t_set)):
+    p = 30
+    r[t,p]   = r[t-1,p]
+    phi[t,p] = phi[t-1,p]
+    localN   = 0
+    phi_sum  = 0
+    r_sum    = 0
+    for i in range(30):
+        dis = d(i,p,t-1)
+        ang = angle(i,p,t-1)
+        if (dis< d_max) and (np.absolute(ang)<angle_max) and (i != p):#need to check but I think the angle is right now
+            localN  += 1
+            w_i      = w(i,p,t-1)
+            phi_sum += w_i * np.sin(phi[t-1,i] - phi[t-1,p])
+            r_sum   += w_i *(r[t-1,i]-r[t-1,p])
+    if localN > 0:
+        r[t,p]   = r[t-1,p]   + delta_t * (c/localN) * r_sum
+        phi[t,p] = phi[t-1,p] - delta_t * (k/localN) * phi_sum
+    distance        = r * delta_t
+    position[t,p,0] = position[t-1,p,0] + distance[t-1,p]*np.cos(phi[t-1,p])
+    position[t,p,1] = position[t-1,p,1] + distance[t-1,p]*np.sin(phi[t-1,p])
 
 #set all initial positions randomly
 '''
@@ -134,3 +149,11 @@ exp1_LateralDeviation_strip = pd.read_csv('/home/ellie/Documents/M4R/exp1/Exp1_L
 exp1_LateralDeviation_strip.columns = ["Subject", "Near 0", "Far 0", "Near 3", "Near 6", "Near 9", "Near 12", "Far 3", "Far 6", "Far 9", "Far 12"]
 exp1_LateralDeviation_strip.drop([10,13,14,25,28,29,40], axis = 0)
 #print(exp1_LateralDeviation_strip)
+t = 5
+x = [t_step*delta_t for t_step in range(int(0.5//delta_t))]
+y = [(10/360)*2*pi*ogive(0,0.083,t_step*delta_t-0.25) for t_step in range(int(0.5//delta_t))]
+
+x1 = np.arange(-5,5,0.01)
+y1 = ogive(3,0.083,x1)
+plt.plot(x1,y1)
+plt.show()
