@@ -5,9 +5,9 @@ import pandas as pd
 from scipy import special
 #Variables:
 delta_t = 0.05
-t_max = 7
+t_max = 10
 n = 31
-d_max = 4
+d_max = 5
 pi = 3.14
 angle_max = pi/2
 k = 3.15
@@ -65,9 +65,9 @@ for i in range(30):
 
 #define subset S for experiment 1
 #either 0,3,6,9,12 neighbours in S
-S = np.array([0,1,28,5,7,12])
+S = np.array([0,1,2,3,4,28,5,7,12])
 #make the perturbed set speed up after total of 5 seconds
-perturb(S, 5, Heading = True, Speed = False)
+perturb(S, 5, sign=-1,Heading = True, Speed = False)
 #print(phi[:,1])
 #print(phi[:,1])
 #get position of virtual neighbours from the perturbed speed and heading
@@ -95,14 +95,14 @@ for t in range(1, len(t_set)):
     for i in range(30):
         dis = d(i,p,t-1)
         ang = angle(i,p,t-1)
-        if (dis< d_max) and (np.absolute(ang)<angle_max) and (i != p):#need to check but I think the angle is right now
+        if (dis< d_max) and (np.absolute(ang)<angle_max) and (i != p):
             localN  += 1
             w_i      = w(i,p,t-1)
             phi_sum += w_i * np.sin(phi[t-1,i] - phi[t-1,p])
             r_sum   += w_i *(r[t-1,i]-r[t-1,p])
     if localN > 0:
         r[t,p]   = r[t-1,p]   + delta_t * (c/localN) * r_sum
-        phi[t,p] = phi[t-1,p] - delta_t * (k/localN) * phi_sum
+        phi[t,p] = phi[t-1,p] - delta_t * (k/localN) * phi_sum  #should this be a plus?? It behaves a lot more nicely when it is.
     distance        = r * delta_t
     position[t,p,0] = position[t-1,p,0] + distance[t-1,p]*np.cos(phi[t-1,p])
     position[t,p,1] = position[t-1,p,1] + distance[t-1,p]*np.sin(phi[t-1,p])
@@ -116,30 +116,6 @@ for i in range(n):
     r[0,i]   = 0.3* random.random()
 '''
 
-#move according to model
-'''
-for t in range(1, len(t_set)):
-    for p in range(n):
-        r[t,p]   = r[t-1,p]
-        phi[t,p] = phi[t-1,p]
-        localN   = 0
-        phi_sum  = 0
-        r_sum    = 0
-        for i in range(n):
-            dis = d(i,p,t-1)
-            ang = angle(i,p,t-1)
-            if (dis< d_max) and (np.absolute(ang)<angle_max) and (i != p):#need to check but I think the angle is right now
-                localN  += 1
-                w_i      = w(i,p,t-1)
-                phi_sum += w_i * np.sin(phi[t-1,i] - phi[t-1,p])
-                r_sum   += w_i *(r[t-1,i]-r[t-1,p])
-        if localN > 0:
-            r[t,p]   = r[t-1,p]   + delta_t * (c/localN) * r_sum
-            phi[t,p] = phi[t-1,p] - delta_t * (k/localN) * phi_sum
-        distance        = r * delta_t
-        position[t,p,0] = position[t-1,p,0] + distance[t-1,p]*np.cos(phi[t-1,p])
-        position[t,p,1] = position[t-1,p,1] + distance[t-1,p]*np.sin(phi[t-1,p])
-'''
 for i in range(n):
     plt.scatter(position[:,i,0],position[:,i,1])
 #my_quiver = np.zeros((len(t_set), n, 2))
