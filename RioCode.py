@@ -5,7 +5,7 @@ import pandas as pd
 from scipy import special
 #Variables:
 delta_t = 0.05
-t_max = 50
+t_max = 7
 n = 31
 d_max = 4
 pi = 3.14
@@ -33,9 +33,9 @@ def perturb(S, t, sign = 1, Heading = True, Speed = False):
     for i in S:
         if Heading == True:
             for all_t in range(int(t//delta_t),len(t_set)):
-                phi[all_t, i] = phi[int(t//delta_t),i] + sign*(10/360)*2*pi
+                phi[all_t, i] = sign*(10/360)*2*pi
             for t_step in range(int(0.5//delta_t)):
-                phi[int(t//delta_t)+t_step,i] = phi[int(t//delta_t),i] + sign*(10/360)*2*pi*ogive(t,0.083,t_step*delta_t-0.25)
+                phi[int(t//delta_t)+t_step,i] = sign*(10/360)*2*pi*ogive(t,0.083,t_step*delta_t-0.25)
         if Speed   == True:
             for all_t in range(int(t//delta_t),len(t_set)):
                 r[all_t, i] = r[int(t//delta_t),i]   + sign*0.3
@@ -56,24 +56,31 @@ position[0,30,1] = 0
 #    plt.annotate(i, (position[0,i,0], position[0,i,1]))
 #plt.show()
 
-#make all virtual people speed up to 1.3m/s in 3 s
+#make all virtual people speed up to 1.3m/s in 3 s and then keep going
 for i in range(30):
+    for t in range(int(3//delta_t),len(t_set)):
+        r[t,i] = 1.3
     for t in range(int(3//delta_t)):
-        r[t,i] = ogive(0,0.5,t*delta_t - 1.5)
+        r[t,i] = 1.3*ogive(0,0.5,t*delta_t - 1.5)
 
 #define subset S for experiment 1
 #either 0,3,6,9,12 neighbours in S
 S = np.array([0,1,28,5,7,12])
 #make the perturbed set speed up after total of 5 seconds
 perturb(S, 5, Heading = True, Speed = False)
-print(phi[:,28])
+#print(phi[:,1])
 #print(phi[:,1])
 #get position of virtual neighbours from the perturbed speed and heading
+phi[:,1] = 0.2
 for t in range(1, len(t_set)):
     for p in range(n):
             distance        = r * delta_t
             position[t,p,0] = position[t-1,p,0] + distance[t-1,p]*np.cos(phi[t-1,p])
             position[t,p,1] = position[t-1,p,1] + distance[t-1,p]*np.sin(phi[t-1,p])
+#print(position[100:200,28,1])
+#print(position[100:200,28,1])
+print(position[:,28,0])
+print(position[:,28,1])
 
 #end trial after participant has walked 12m condition
 
