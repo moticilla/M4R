@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from scipy import special
 #Variables:
-delta_t = 0.2
-t_max = 60
+delta_t = 0.05
+t_max = 50
 n = 31
 d_max = 4
 pi = 3.14
@@ -28,15 +28,19 @@ def w(i,p,t):
     return ( a/(np.exp(w_var * dis)+a) )
 def ogive(mu, sigma,t):
     return 0.5 *(1+special.erf((t-mu)/sigma*np.sqrt(2)))
-def perturb(S, t, Heading = True, Speed = False):
+def perturb(S, t, sign = 1, Heading = True, Speed = False):
     #S is the set of virtual neighbours to be perturbed either by speed or by heading at time t
-    sign = choice([1,-1])
     for i in S:
-        for t_step in range(int(0.5//delta_t)):
-            if Heading == True:
-                phi[t+t_step,i] = phi[t,i] + sign*(10/360)*2*pi*ogive(t,0.083,t_step*delta_t-0.25)
-            if Speed   == True:
-                r[t+t_step,i]   = r[t,i]   + sign*0.3*ogive(t,0.083,t_step*delta_t-0.25)
+        if Heading == True:
+            for all_t in range(int(t//delta_t),len(t_set)):
+                phi[all_t, i] = phi[int(t//delta_t),i] + sign*(10/360)*2*pi
+            for t_step in range(int(0.5//delta_t)):
+                phi[int(t//delta_t)+t_step,i] = phi[int(t//delta_t),i] + sign*(10/360)*2*pi*ogive(t,0.083,t_step*delta_t-0.25)
+        if Speed   == True:
+            for all_t in range(int(t//delta_t),len(t_set)):
+                r[all_t, i] = r[int(t//delta_t),i]   + sign*0.3
+            for t_step in range(int(0.5//delta_t)):
+                r[int(t//delta_t)+t_step,i]   = r[int(t//delta_t),i]   + sign*0.3*ogive(t,0.083,t_step*delta_t-0.25)
 
 #set position of 30 neighbours for experiment 1 in two circles with real person in the middle
 for i in range(14):
@@ -60,11 +64,10 @@ for i in range(30):
 #define subset S for experiment 1
 #either 0,3,6,9,12 neighbours in S
 S = np.array([0,1,28,5,7,12])
-
 #make the perturbed set speed up after total of 5 seconds
 perturb(S, 5, Heading = True, Speed = False)
-print(phi[:,0])
-print(phi[:,1])
+print(phi[:,28])
+#print(phi[:,1])
 #get position of virtual neighbours from the perturbed speed and heading
 for t in range(1, len(t_set)):
     for p in range(n):
@@ -155,5 +158,5 @@ y = [(10/360)*2*pi*ogive(0,0.083,t_step*delta_t-0.25) for t_step in range(int(0.
 
 x1 = np.arange(-5,5,0.01)
 y1 = ogive(3,0.083,x1)
-plt.plot(x1,y1)
-plt.show()
+#plt.plot(x1,y1)
+#plt.show()
