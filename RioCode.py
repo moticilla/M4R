@@ -5,7 +5,7 @@ import pandas as pd
 from scipy import special
 #Variables:
 delta_t = 0.05
-t_max = 10
+t_max = 20
 n = 31
 d_max = 5
 pi = 3.14
@@ -77,15 +77,15 @@ for t in range(1, len(t_set)):
             distance        = r * delta_t
             position[t,p,0] = position[t-1,p,0] + distance[t-1,p]*np.cos(phi[t-1,p])
             position[t,p,1] = position[t-1,p,1] + distance[t-1,p]*np.sin(phi[t-1,p])
-#print(position[100:200,28,1])
-#print(position[100:200,28,1])
-print(position[:,28,0])
-print(position[:,28,1])
+#print(position[:,28,0])
+#print(position[:,28,1])
 
 #end trial after participant has walked 12m condition
 
-#move the "real" person
-for t in range(1, len(t_set)):
+#move the "real" person (for 12m)
+total_distance = 0
+t = 1
+while total_distance<12 and t<len(t_set):
     p = 30
     r[t,p]   = r[t-1,p]
     phi[t,p] = phi[t-1,p]
@@ -104,9 +104,11 @@ for t in range(1, len(t_set)):
         r[t,p]   = r[t-1,p]   + delta_t * (c/localN) * r_sum
         phi[t,p] = phi[t-1,p] - delta_t * (k/localN) * phi_sum  #should this be a plus?? It behaves a lot more nicely when it is.
     distance        = r * delta_t
+    total_distance= np.sum(distance[:,30])
     position[t,p,0] = position[t-1,p,0] + distance[t-1,p]*np.cos(phi[t-1,p])
     position[t,p,1] = position[t-1,p,1] + distance[t-1,p]*np.sin(phi[t-1,p])
-
+    t += 1
+print(total_distance)
 #set all initial positions randomly
 '''
 for i in range(n):
