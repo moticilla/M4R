@@ -141,6 +141,8 @@ all_together(3,S)
 #define subset S for experiment 1 Near 9, heading
 S = np.array([0,1,2,3,4,5,6,7,8])
 all_together(4,S)
+plt.plot(t_set,phi[:,1])
+plt.show()
 #define subset S for experiment 1 Near 12, heading
 S = np.array([0,1,2,3,4,5,6,7,8,9,10,11])
 all_together(5,S)
@@ -247,8 +249,8 @@ plt.show()
 
 y_near_heading = [my_exp1_final_heading_data[0][i] for i in [0,2,3,4,5]]
 y_far_heading = [my_exp1_final_heading_data[0][i] for i in [1,6,7,8,9]]
-y_near_speed = [my_exp1_final_heading_data[0][i]-1.3 for i in [0,2,3,4,5]]
-y_far_speed = [my_exp1_final_heading_data[0][i]-1.3 for i in [1,6,7,8,9]]
+y_near_speed = [my_exp1_final_heading_data[1][i]-1.3 for i in [0,2,3,4,5]]
+y_far_speed = [my_exp1_final_heading_data[1][i]-1.3 for i in [1,6,7,8,9]]
 
 plt.subplot(2, 1, 1)
 plt.plot(x,y_near_heading,color = 'b')
