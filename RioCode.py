@@ -143,6 +143,8 @@ S = np.array([0,1,2,3,4,5,6,7,8])
 all_together(4,S)
 #plt.plot(t_set,phi[:,1])
 #plt.show()
+#animate the people moving over time:
+
 #define subset S for experiment 1 Near 12, heading
 S = np.array([0,1,2,3,4,5,6,7,8,9,10,11])
 all_together(5,S)
@@ -265,3 +267,5 @@ plt.ylabel('Final change in speed')
 plt.xlabel('Number of perturbed neighours')
 
 plt.show()
+
+#animate the plot of virtual people
