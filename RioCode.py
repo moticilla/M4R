@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from scipy import special
+import matplotlib.animation as animation
 #Variables:
 delta_t = 0.05
 t_max = 15
@@ -144,7 +145,41 @@ all_together(4,S)
 #plt.plot(t_set,phi[:,1])
 #plt.show()
 #animate the people moving over time:
+fig, ax = plt.subplots()
+#plt.scatter(position[:,i,0],position[:,i,1], s=5)
+#for i in range(n):
+    #scat = ax.scatter(position[:,i,0],position[:,i,1], c="b", s=5, label='v0 = m/s')
+#for i in range(n):
+scat1 = ax.scatter(position[0,1,0],position[0,1,1], c="b", s=5, label='v0 = m/s')
+scat2 = ax.scatter(position[0,2,0],position[0,2,1], c="b", s=5, label='v0 = m/s')
+ax.set(xlim=[-5, 26], ylim=[-4, 4], xlabel='Time [s]', ylabel='Z [m]')
+ax.legend()
 
+def update(frame):
+    # for each frame, update the data stored on each artist.
+    x1 = position[:frame,1,0]
+    y1 = position[:frame,1,1]
+    # update the scatter plot:
+    data = np.stack([x1, y1]).T
+    scat1.set_offsets(data)
+    # for each frame, update the data stored on each artist.
+    x1 = position[:frame,2,0]
+    y1 = position[:frame,2,1]
+    # update the scatter plot:
+    data = np.stack([x1, y1]).T
+    scat2.set_offsets(data)
+    for i in range(n):
+        # for each frame, update the data stored on each artist.
+        x1 = position[:frame,1,0]
+        y1 = position[:frame,1,1]
+        # update the scatter plot:
+        data = np.stack([x1, y1]).T
+        scat1.set_offsets(data)
+    
+    return (scat1, scat2)
+
+ani = animation.FuncAnimation(fig=fig, func=update, frames=300, interval=20)
+plt.show()
 #define subset S for experiment 1 Near 12, heading
 S = np.array([0,1,2,3,4,5,6,7,8,9,10,11])
 all_together(5,S)
@@ -194,9 +229,9 @@ all_together(9,S,h=False, speed =True)
 #make dataFrame
 my_exp1_final_heading = pd.DataFrame(my_exp1_final_heading_data, columns=['Near0', 'Far0','Near3','Near6','Near9',
                                                                           'Near12','Far3','Far6','Far9','Far12'])
-#for i in range(n):
-    #plt.scatter(position[:,i,0],position[:,i,1], s=5)
-
+for i in range(n):
+    plt.scatter(position[:,i,0],position[:,i,1], s=5)
+plt.show()
 #my_quiver = np.zeros((len(t_set), n, 2))
 #for t in range(len(t_set)-1):
 #    for p in range(n):
@@ -268,4 +303,3 @@ plt.xlabel('Number of perturbed neighours')
 
 plt.show()
 
-#animate the plot of virtual people
