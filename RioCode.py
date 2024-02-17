@@ -129,6 +129,37 @@ def all_together(i,S, h=True, speed =False):
     #un perturb by heading
     for i in range(30):
         phi[:,i] = 0
+
+def animate_everyone():
+    #animate the people moving over time:
+    fig, ax = plt.subplots()
+    scat1 = ax.scatter(position[0,0,0],position[0,0,1], c="y", s=5, label='virtual person')
+    scat = [scat1]
+    for i in range (n-1):
+        scat1 = ax.scatter(position[0,i,0],position[0,i,1], c="y", s=5)
+        scat.append(scat1)
+    scat30 = ax.scatter(position[0,30,0],position[0,30,1], c="r", s=5, label='"real" person')
+    scat.append(scat30)
+    ax.set(xlim=[-5, 26], ylim=[-4, 4], xlabel='x (m)', ylabel='y (m)')
+    ax.legend()
+
+    def update(frame):
+        for i in range(n-1):
+            # for each frame, update the data stored on each artist.
+            x1 = position[:frame,i,0]
+            y1 = position[:frame,i,1]
+            # update the scatter plot:
+            data = np.stack([x1, y1]).T
+            scat[i].set_offsets(data)
+        x1 = position[:frame,30,0]
+        y1 = position[:frame,30,1]
+        # update the scatter plot:
+        data = np.stack([x1, y1]).T
+        scat30.set_offsets(data)
+        return (scat30, (scat[i] for i in range(n-1)))
+    ani = animation.FuncAnimation(fig=fig, func=update, frames=300, interval=12)
+    plt.show()
+
 #define subset S for experiment 1 Near 0,Far 0, heading
 S = np.array([])
 all_together(0,S)
@@ -142,44 +173,6 @@ all_together(3,S)
 #define subset S for experiment 1 Near 9, heading
 S = np.array([0,1,2,3,4,5,6,7,8])
 all_together(4,S)
-#plt.plot(t_set,phi[:,1])
-#plt.show()
-#animate the people moving over time:
-fig, ax = plt.subplots()
-#plt.scatter(position[:,i,0],position[:,i,1], s=5)
-#for i in range(n):
-    #scat = ax.scatter(position[:,i,0],position[:,i,1], c="b", s=5, label='v0 = m/s')
-#for i in range(n):
-scat1 = ax.scatter(position[0,1,0],position[0,1,1], c="b", s=5, label='v0 = m/s')
-scat2 = ax.scatter(position[0,2,0],position[0,2,1], c="b", s=5, label='v0 = m/s')
-ax.set(xlim=[-5, 26], ylim=[-4, 4], xlabel='Time [s]', ylabel='Z [m]')
-ax.legend()
-
-def update(frame):
-    # for each frame, update the data stored on each artist.
-    x1 = position[:frame,1,0]
-    y1 = position[:frame,1,1]
-    # update the scatter plot:
-    data = np.stack([x1, y1]).T
-    scat1.set_offsets(data)
-    # for each frame, update the data stored on each artist.
-    x1 = position[:frame,2,0]
-    y1 = position[:frame,2,1]
-    # update the scatter plot:
-    data = np.stack([x1, y1]).T
-    scat2.set_offsets(data)
-    for i in range(n):
-        # for each frame, update the data stored on each artist.
-        x1 = position[:frame,1,0]
-        y1 = position[:frame,1,1]
-        # update the scatter plot:
-        data = np.stack([x1, y1]).T
-        scat1.set_offsets(data)
-    
-    return (scat1, scat2)
-
-ani = animation.FuncAnimation(fig=fig, func=update, frames=300, interval=20)
-plt.show()
 #define subset S for experiment 1 Near 12, heading
 S = np.array([0,1,2,3,4,5,6,7,8,9,10,11])
 all_together(5,S)
@@ -195,7 +188,6 @@ all_together(8,S)
 #define subset S for experiment 1 Far 12, heading
 S = np.array([14,15,16,17,18,19,20,21,22,23,24,25,26])
 all_together(9,S)
-
 #define subset S for experiment 1 Near 0,Far 0, speed
 S = np.array([])
 all_together(0,S,h=False, speed =True)
