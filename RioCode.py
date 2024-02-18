@@ -11,7 +11,7 @@ n = 31
 d_max = 5
 pi = 3.14
 angle_max = pi/2
-k = 100
+k = 5
 a = 9.2
 w_var = 1.3
 c = 3.61
@@ -185,6 +185,7 @@ all_together(7,S)
 #define subset S for experiment 1 Far 9, heading
 S = np.array([14,15,16,17,18,19,20,21,22])
 all_together(8,S)
+animate_everyone()
 #define subset S for experiment 1 Far 12, heading
 S = np.array([14,15,16,17,18,19,20,21,22,23,24,25,26])
 all_together(9,S)
@@ -221,9 +222,10 @@ all_together(9,S,h=False, speed =True)
 #make dataFrame
 my_exp1_final_heading = pd.DataFrame(my_exp1_final_heading_data, columns=['Near0', 'Far0','Near3','Near6','Near9',
                                                                           'Near12','Far3','Far6','Far9','Far12'])
-for i in range(n):
-    plt.scatter(position[:,i,0],position[:,i,1], s=5)
-plt.show()
+#for i in range(n):
+#    plt.scatter(position[:,i,0],position[:,i,1], s=5)
+#plt.show()
+
 #my_quiver = np.zeros((len(t_set), n, 2))
 #for t in range(len(t_set)-1):
 #    for p in range(n):
