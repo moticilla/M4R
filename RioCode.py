@@ -274,14 +274,14 @@ y_near_heading = [exp1_final_heading.Near0[11],exp1_final_heading.Near3[11],exp1
 y_far_heading = [exp1_final_heading.Far0[11],exp1_final_heading.Far3[11],exp1_final_heading.Far6[11],exp1_final_heading.Far9[11],exp1_final_heading.Far12[11]]
 
 plt.subplot(2, 1, 1)
-plt.plot(x,y_near_heading,color = 'b')
-plt.plot(x,y_far_heading,color = 'r')
+plt.plot(x,y_near_heading,color = 'b',label = 'Paper near')
+plt.plot(x,y_far_heading,color = 'r', label = 'paper far')
 plt.title(f'Final headings and speeds from paper, k={k}')
 plt.ylabel('Final lateral deviation')
 
 plt.subplot(2, 1, 2)
-plt.plot(x,y_near_speed,color = 'b')
-plt.plot(x,y_far_speed,color = 'r')
+plt.plot(x,y_near_speed,color = 'b', label = 'Paper near')
+plt.plot(x,y_far_speed,color = 'r', label = 'Paper far')
 plt.ylabel('Final change in speed')
 plt.xlabel('Number of perturbed neighours')
 
@@ -293,14 +293,14 @@ y_near_speed = [my_exp1_final_heading_data[1][i] for i in [0,2,3,4,5]]
 y_far_speed = [my_exp1_final_heading_data[1][i] for i in [1,6,7,8,9]]
 
 plt.subplot(2, 1, 1)
-plt.plot(x,y_near_heading,color = 'g')
-plt.plot(x,y_far_heading,color = 'y')
+plt.plot(x,y_near_heading,color = 'g',label = 'My near')
+plt.plot(x,y_far_heading,color = 'y',label = 'My far')
 plt.title(f'My Final headings and speeds, k={k}')
 plt.ylabel('Final lateral deviation')
 
 plt.subplot(2, 1, 2)
-plt.plot(x,y_near_speed,color = 'g')
-plt.plot(x,y_far_speed,color = 'y')
+plt.plot(x,y_near_speed,color = 'g', label = 'My near')
+plt.plot(x,y_far_speed,color = 'y', label = 'My far')
 plt.ylabel('Final change in speed')
 plt.xlabel('Number of perturbed neighours')
 
