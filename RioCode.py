@@ -9,7 +9,7 @@ delta_t = 0.05
 t_max = 15
 n = 31
 d_max = 5
-pi = 3.14
+pi = np.pi
 angle_max = pi/2
 k = 5
 a = 9.2
@@ -52,10 +52,10 @@ for i in range(14,30):
     position[0,i,1] = normalvariate(3.5,0.15)*np.cos(normalvariate((i-14)*pi/8,(8/360)*2*pi))
 position[0,30,0] = 0
 position[0,30,1] = 0
-#plt.scatter(position[0,:,0], position[0,:,1])
-#for i in range(31):
-#    plt.annotate(i, (position[0,i,0], position[0,i,1]))
-#plt.show()
+plt.scatter(position[0,:,0], position[0,:,1])
+for i in range(31):
+    plt.annotate(i, (position[0,i,0], position[0,i,1]))
+plt.show()
 
 def move_person():
     total_distance = 0
@@ -135,8 +135,17 @@ def animate_everyone():
     fig, ax = plt.subplots()
     scat1 = ax.scatter(position[0,0,0],position[0,0,1], c="y", s=5, label='virtual person')
     scat = [scat1]
-    for i in range (n-1):
+    for i in range(0,8):
         scat1 = ax.scatter(position[0,i,0],position[0,i,1], c="y", s=5)
+        scat.append(scat1)
+    for i in range(8,15):
+        scat1 = ax.scatter(position[0,i,0],position[0,i,1], c="b", s=5)
+        scat.append(scat1)
+    for i in range(15,23):
+        scat1 = ax.scatter(position[0,i,0],position[0,i,1], c="y", s=5)
+        scat.append(scat1)
+    for i in range(23,n-1):
+        scat1 = ax.scatter(position[0,i,0],position[0,i,1], c="b", s=5)
         scat.append(scat1)
     scat30 = ax.scatter(position[0,30,0],position[0,30,1], c="r", s=5, label='"real" person')
     scat.append(scat30)
@@ -276,7 +285,7 @@ plt.plot(x,y_far_speed,color = 'r')
 plt.ylabel('Final change in speed')
 plt.xlabel('Number of perturbed neighours')
 
-plt.show()
+#plt.show()
 
 y_near_heading = [my_exp1_final_heading_data[0][i] for i in [0,2,3,4,5]]
 y_far_heading = [my_exp1_final_heading_data[0][i] for i in [1,6,7,8,9]]
