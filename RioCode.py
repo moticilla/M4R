@@ -5,13 +5,13 @@ import pandas as pd
 from scipy import special
 import matplotlib.animation as animation
 #Variables:
-delta_t = 0.05
 t_max = 15
 n = 31
 d_max = 5
 pi = np.pi
 angle_max = pi/2
-k = 5
+k = 3.15
+delta_t = 0.15/k
 a = 9.2
 w_var = 1.3
 c = 3.61
@@ -54,7 +54,8 @@ position[0,30,0] = 0
 position[0,30,1] = 0
 plt.scatter(position[0,:,0], position[0,:,1])
 for i in range(31):
-    plt.annotate(i, (position[0,i,0], position[0,i,1]))
+    plt.annotate(angle(i,30,0)*180/pi, (position[0,i,0], position[0,i,1]))
+    #print(angle(i,30,0)*180/pi)
 plt.show()
 
 def move_person():
@@ -179,6 +180,7 @@ all_together(2,S)
 #define subset S for experiment 1 Near 6, heading
 S = np.array([0,1,2,3,4,5])
 all_together(3,S)
+#animate_everyone()
 #define subset S for experiment 1 Near 9, heading
 S = np.array([0,1,2,3,4,5,6,7,8])
 all_together(4,S)
@@ -191,6 +193,7 @@ all_together(6,S)
 #define subset S for experiment 1 Far 6, heading
 S = np.array([14,15,16,17,18,19])
 all_together(7,S)
+
 #define subset S for experiment 1 Far 9, heading
 S = np.array([14,15,16,17,18,19,20,21,22])
 all_together(8,S)
@@ -276,7 +279,7 @@ y_far_heading = [exp1_final_heading.Far0[11],exp1_final_heading.Far3[11],exp1_fi
 plt.subplot(2, 1, 1)
 plt.plot(x,y_near_heading,color = 'b',label = 'Paper near')
 plt.plot(x,y_far_heading,color = 'r', label = 'paper far')
-plt.title(f'Final headings and speeds from paper, k={k}')
+plt.title(f'Final headings and speeds from paper, k={k}, a={a}')
 plt.ylabel('Final lateral deviation')
 
 plt.subplot(2, 1, 2)
@@ -295,7 +298,7 @@ y_far_speed = [my_exp1_final_heading_data[1][i] for i in [1,6,7,8,9]]
 plt.subplot(2, 1, 1)
 plt.plot(x,y_near_heading,color = 'g',label = 'My near')
 plt.plot(x,y_far_heading,color = 'y',label = 'My far')
-plt.title(f'My Final headings and speeds, k={k}')
+plt.title(f'My Final headings and speeds, k={k}, a={a}')
 plt.ylabel('Final lateral deviation')
 
 plt.subplot(2, 1, 2)
