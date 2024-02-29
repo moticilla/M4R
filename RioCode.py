@@ -4,13 +4,16 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from scipy import special
 import matplotlib.animation as animation
+import time
+
+start = time.time()
 #Variables:
 t_max = 15
 n = 31
 d_max = 5
 pi = np.pi
 angle_max = pi/2
-k = 3.15
+k = 100
 delta_t = 0.15/k
 a = 9.2
 w_var = 1.3
@@ -22,8 +25,8 @@ r        = np.zeros((len(t_set),n)) #this is r dot not r
 def d(i,p,t):
     return np.sqrt((position[t,p,0]-position[t,i,0])**2 + (position[t,p,1]-position[t,i,1])**2)
 def angle(i,p,t):
-    theta = np.arctan((position[t,i,1]-position[t,p,1])/ (position[t,i,0] - position[t,p,0]))
-    return phi[t,p]-theta
+    theta = np.arctan(np.absolute(position[t,i,1]-position[t,p,1])/ (position[t,i,0] - position[t,p,0]))
+    return (np.absolute(phi[t,p]-theta)-pi/2)*np.sign(theta) +pi/2
 def w(i,p,t):
     dis = d(i,p,t)
     return ( a/(np.exp(w_var * dis)+a) )
@@ -54,7 +57,8 @@ position[0,30,0] = 0
 position[0,30,1] = 0
 plt.scatter(position[0,:,0], position[0,:,1])
 for i in range(31):
-    plt.annotate(angle(i,30,0)*180/pi, (position[0,i,0], position[0,i,1]))
+    #plt.annotate(angle(i,30,0)*180/pi, (position[0,i,0], position[0,i,1]))
+    plt.annotate((i,angle(i,30,0)*180/pi), (position[0,i,0], position[0,i,1]))
     #print(angle(i,30,0)*180/pi)
 plt.show()
 
@@ -167,67 +171,75 @@ def animate_everyone():
         data = np.stack([x1, y1]).T
         scat30.set_offsets(data)
         return (scat30, (scat[i] for i in range(n-1)))
-    ani = animation.FuncAnimation(fig=fig, func=update, frames=300, interval=12)
+
+    plt.annotate(i, (position[0,i,0], position[0,i,1]))
+    ani = animation.FuncAnimation(fig=fig, func=update, frames=300, interval=0.2/delta_t)
     plt.show()
 
 #define subset S for experiment 1 Near 0,Far 0, heading
 S = np.array([])
 all_together(0,S)
 all_together(1,S)
+plt.scatter(position[0,:,0], position[0,:,1])
+for i in range(31):
+    #plt.annotate(angle(i,30,0)*180/pi, (position[0,i,0], position[0,i,1]))
+    plt.annotate((i,angle(i,30,3)*180/pi), (position[3,i,0], position[3,i,1]))
+    #print(angle(i,30,0)*180/pi)
+plt.show()
 #define subset S for experiment 1 Near 3, heading
-S = np.array([0,1,2])
+S = np.random.choice([2,3,4,5],3, replace=False)
 all_together(2,S)
 #define subset S for experiment 1 Near 6, heading
-S = np.array([0,1,2,3,4,5])
+S = np.concatenate((np.array([2,3,4,5]),np.random.choice([16,17,18,19,20],2, replace=False)))
 all_together(3,S)
 #animate_everyone()
 #define subset S for experiment 1 Near 9, heading
-S = np.array([0,1,2,3,4,5,6,7,8])
+S = np.concatenate((np.array([2,3,4,5]),np.random.choice([16,17,18,19,20],5, replace=False)))
 all_together(4,S)
 #define subset S for experiment 1 Near 12, heading
-S = np.array([0,1,2,3,4,5,6,7,8,9,10,11])
+S = np.concatenate((np.array([1,2,3,4,5]),np.random.choice([15,16,17,18,19,20,21],7, replace=False)))
 all_together(5,S)
 #define subset S for experiment 1 Far 3, heading
-S = np.array([14,15,16])
+S = np.random.choice([16,17,18,19,20],3, replace=False)
 all_together(6,S)
 #define subset S for experiment 1 Far 6, heading
-S = np.array([14,15,16,17,18,19])
+S = np.random.choice([15,16,17,18,19,20,21],6, replace=False)
 all_together(7,S)
-
 #define subset S for experiment 1 Far 9, heading
-S = np.array([14,15,16,17,18,19,20,21,22])
+S = np.concatenate((np.array([15,16,17,18,19,20,21]),np.random.choice([1,2,3,4,5],2, replace=False)))
 all_together(8,S)
-animate_everyone()
+#animate_everyone()
 #define subset S for experiment 1 Far 12, heading
-S = np.array([14,15,16,17,18,19,20,21,22,23,24,25,26])
+S = np.concatenate((np.array([15,16,17,18,19,20,21]),np.random.choice([1,2,3,4,5],5, replace=False)))
 all_together(9,S)
+
 #define subset S for experiment 1 Near 0,Far 0, speed
 S = np.array([])
 all_together(0,S,h=False, speed =True)
 all_together(1,S,h=False, speed =True)
 #define subset S for experiment 1 Near 3, speed
-S = np.array([0,1,2])
+S = np.random.choice([2,3,4,5],3, replace=False)
 all_together(2,S,h=False, speed =True)
 #define subset S for experiment 1 Near 6, speed
-S = np.array([0,1,2,3,4,5])
+S = np.concatenate((np.array([2,3,4,5]),np.random.choice([16,17,18,19,20],2, replace=False)))
 all_together(3,S,h=False, speed =True)
 #define subset S for experiment 1 Near 9, speed
-S = np.array([0,1,2,3,4,5,6,7,8])
+S = np.concatenate((np.array([2,3,4,5]),np.random.choice([16,17,18,19,20],5, replace=False)))
 all_together(4,S,h=False, speed =True)
 #define subset S for experiment 1 Near 12, speed
-S = np.array([0,1,2,3,4,5,6,7,8,9,10,11])
+S = np.concatenate((np.array([1,2,3,4,5]),np.random.choice([15,16,17,18,19,20,21],7, replace=False)))
 all_together(5,S,h=False, speed =True)
 #define subset S for experiment 1 Far 3, speed
-S = np.array([14,15,16])
+S = np.random.choice([16,17,18,19,20],3, replace=False)
 all_together(6,S,h=False, speed =True)
 #define subset S for experiment 1 Far 6, speed
-S = np.array([14,15,16,17,18,19])
+S = np.random.choice([15,16,17,18,19,20,21],6, replace=False)
 all_together(7,S,h=False, speed =True)
 #define subset S for experiment 1 Far 9, speed
-S = np.array([14,15,16,17,18,19,20,21,22])
+S = np.concatenate((np.array([15,16,17,18,19,20,21]),np.random.choice([1,2,3,4,5],2, replace=False)))
 all_together(8,S,h=False, speed =True)
 #define subset S for experiment 1 Far 12, speed
-S = np.array([14,15,16,17,18,19,20,21,22,23,24,25,26])
+S = np.concatenate((np.array([15,16,17,18,19,20,21]),np.random.choice([1,2,3,4,5],5, replace=False)))
 all_together(9,S,h=False, speed =True)
 
 
@@ -309,3 +321,6 @@ plt.xlabel('Number of perturbed neighours')
 
 plt.show()
 
+end = time.time()
+print("The time of execution of above program is :",
+      (end-start) * 10**3, "ms")
