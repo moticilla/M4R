@@ -23,13 +23,13 @@ t_set    = np.arange(0, t_max, delta_t)
 position = np.zeros((len(t_set), n, 2))
 phi      = np.zeros((len(t_set),n))
 r        = np.zeros((len(t_set),n)) #this is r dot not r
-def d(i,p,t):
-    return np.sqrt((position[t,p,0]-position[t,i,0])**2 + (position[t,p,1]-position[t,i,1])**2)
-def angle(i,p,t):
-    theta = np.arctan(np.absolute(position[t,i,1]-position[t,p,1])/ (position[t,i,0] - position[t,p,0]))
+def d(position,p,t):
+    return np.sqrt((position[t,p,0]-position[t,:,0])**2 + (position[t,p,1]-position[t,:,1])**2)
+def angle(position,p,t):
+    theta = np.arctan(np.absolute(position[t,:,1]-position[t,p,1])/ (position[t,:,0] - position[t,p,0]))
     return (np.absolute(phi[t,p]-theta)-pi/2)*np.sign(theta) + pi/2
-def w(i,p,t):
-    dis = d(i,p,t)
+def w(position,p,t):
+    dis = d(position,p,t)
     return ( a/(np.exp(w_var * dis)+a) )
 def ogive(mu, sigma,t):
     return 0.5 *(1+special.erf((t-mu)/sigma*np.sqrt(2)))
@@ -58,9 +58,9 @@ position[0,30,0] = 0
 position[0,30,1] = 0
 plt.scatter(position[0,:,0], position[0,:,1])
 for i in range(31):
-    #plt.annotate(angle(i,30,0)*180/pi, (position[0,i,0], position[0,i,1]))
-    plt.annotate((i,angle(i,30,0)*180/pi), (position[0,i,0], position[0,i,1]))
-    #print(angle(i,30,0)*180/pi)
+    #plt.annotate(angle(position,30,0)[i]*180/pi, (position[0,i,0], position[0,i,1]))
+    plt.annotate((i,angle(position,30,0)[i]*180/pi), (position[0,i,0], position[0,i,1]))
+    #print(angle(position,30,0)[i]*180/pi)
 plt.show()
 
 def move_person():
@@ -76,14 +76,14 @@ def move_person():
         localN   = 0
         phi_sum  = 0
         r_sum    = 0
+        dis = d(position,p,t-1)
+        ang = angle(position,p,t-1)
+        w_i      = w(position,p,t-1)
         for i in range(30):
-            dis = d(i,p,t-1)
-            ang = angle(i,p,t-1)
-            if (dis< d_max) and (np.absolute(ang)<angle_max) and (i != p):
+            if (dis[i]< d_max) and (np.absolute(ang[i])<angle_max) and (i != p):
                 localN  += 1
-                w_i      = w(i,p,t-1)
-                phi_sum += w_i * np.sin(phi[t-1,i] - phi[t-1,p])
-                r_sum   += w_i *(r[t-1,i]-r[t-1,p])
+                phi_sum += w_i[i] * np.sin(phi[t-1,i] - phi[t-1,p])
+                r_sum   += w_i[i] *(r[t-1,i]-r[t-1,p])
         if localN > 0:
             r[t,p]   = r[t-1,p]   + delta_t * (c/localN) * r_sum
             phi[t,p] = phi[t-1,p] + delta_t * (k/localN) * phi_sum #need to decide if + or -
@@ -94,11 +94,11 @@ def move_person():
         t += 1
 
 #make all virtual people speed up to 1.3m/s in 3 s and then keep going
-for i in range(30):
-    for t in range(int(3//delta_t),len(t_set)):
-        r[t,i] = 1.3
-    for t in range(int(3//delta_t)):
-        r[t,i] = 1.3*ogive(0,0.5,t*delta_t - 1.5)
+#for i in range(30):
+#for t in range(int(3//delta_t),len(t_set)):
+r[int(3//delta_t):len(t_set),:30] = 1.3
+for t in range(int(3//delta_t)):
+    r[t,:30] = 1.3*ogive(0,0.5,t*delta_t - 1.5)
 
 my_exp1_final_heading_data = [[1,2,3,0,0,0,0,0,0,0],[1,2,3,0,0,0,0,0,0,0]]
 def all_together(i,S, h=True, speed =False):
@@ -127,15 +127,15 @@ def all_together(i,S, h=True, speed =False):
         my_exp1_final_heading_data[1][i]=r[final_t-1,30]
     #un perturb virtual people by speed
     #for i in range(30):
-    for t in range(int(3//delta_t),len(t_set)):
-        r[t,:] = 1.3
+    #for t in range(int(3//delta_t),len(t_set)):
+    r[int(3//delta_t):len(t_set),:] = 1.3
     for t in range(int(3//delta_t)):
         r[t,:] = 1.3*ogive(0,0.5,t*delta_t - 1.5)
-    #for i in range(len(t_set)):
-        r[:,30]=0
+    #for t in range(len(t_set)):
+    r[:,30]=0
     #un perturb by heading
-    for i in range(30):
-        phi[:,i] = 0
+    #for i in range(30):
+    phi[:,:30] = 0
 
 def animate_everyone():
     #animate the people moving over time:
