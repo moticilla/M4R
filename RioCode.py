@@ -13,8 +13,9 @@ n = 31
 d_max = 5
 pi = np.pi
 angle_max = pi/2
-k = 100
-delta_t = 0.15/k
+k = 20
+#delta_t = 0.15/k
+delta_t = 0.3/k
 a = 9.2
 w_var = 1.3
 c = 3.61
@@ -26,7 +27,7 @@ def d(i,p,t):
     return np.sqrt((position[t,p,0]-position[t,i,0])**2 + (position[t,p,1]-position[t,i,1])**2)
 def angle(i,p,t):
     theta = np.arctan(np.absolute(position[t,i,1]-position[t,p,1])/ (position[t,i,0] - position[t,p,0]))
-    return (np.absolute(phi[t,p]-theta)-pi/2)*np.sign(theta) +pi/2
+    return (np.absolute(phi[t,p]-theta)-pi/2)*np.sign(theta) + pi/2
 def w(i,p,t):
     dis = d(i,p,t)
     return ( a/(np.exp(w_var * dis)+a) )
@@ -36,13 +37,13 @@ def perturb(S, t, sign = 1, Heading = True, Speed = False):
     #S is the set of virtual neighbours to be perturbed either by speed or by heading at time t
     for i in S:
         if Heading == True:
-            for all_t in range(int(t//delta_t),len(t_set)):
-                phi[all_t, i] = sign*(10/360)*2*pi
+            #for all_t in range(int(t//delta_t),len(t_set)):
+            phi[int(t//delta_t):len(t_set), i] = sign*(10/360)*2*pi
             for t_step in range(int(0.5//delta_t)):
                 phi[int(t//delta_t)+t_step,i] = sign*(10/360)*2*pi*ogive(t,0.083,t_step*delta_t-0.25)
         if Speed   == True:
-            for all_t in range(int(t//delta_t),len(t_set)):
-                r[all_t, i] = r[int(t//delta_t),i]   + sign*0.3
+            #for all_t in range(int(t//delta_t),len(t_set)):
+            r[int(t//delta_t):len(t_set), i] = r[int(t//delta_t),i]   + sign*0.3
             for t_step in range(int(0.5//delta_t)):
                 r[int(t//delta_t)+t_step,i]   = r[int(t//delta_t),i]   + sign*0.3*ogive(t,0.083,t_step*delta_t-0.25)
 
@@ -108,29 +109,30 @@ def all_together(i,S, h=True, speed =False):
     perturb(S, 5,Heading = h, Speed = speed)
     #get position of virtual neighbours from the perturbed speed and heading
     for t in range(1, len(t_set)):
-        for p in range(n):
-                distance        = r * delta_t
-                position[t,p,0] = position[t-1,p,0] + distance[t-1,p]*np.cos(phi[t-1,p])
-                position[t,p,1] = position[t-1,p,1] + distance[t-1,p]*np.sin(phi[t-1,p])
+        #for p in range(n):
+            distance        = r * delta_t
+            position[t,:,0] = position[t-1,:,0] + distance[t-1,:]*np.cos(phi[t-1,:])
+            position[t,:,1] = position[t-1,:,1] + distance[t-1,:]*np.sin(phi[t-1,:])
     #move the "real" person (for 12m)
     move_person()
     #find the t that corresponds with stopping after 12m
     final_t = 3
     while r[final_t,30] >0 and final_t<1000:
         final_t+=1
+    print(final_t)
     #update dataframe
     if h == True:
         my_exp1_final_heading_data[0][i]=phi[final_t-1,30]*360/(2*pi)
     if speed ==True:
         my_exp1_final_heading_data[1][i]=r[final_t-1,30]
     #un perturb virtual people by speed
-    for i in range(30):
-        for t in range(int(3//delta_t),len(t_set)):
-            r[t,i] = 1.3
-        for t in range(int(3//delta_t)):
-            r[t,i] = 1.3*ogive(0,0.5,t*delta_t - 1.5)
-    for i in range(len(t_set)):
-        r[i,30]=0
+    #for i in range(30):
+    for t in range(int(3//delta_t),len(t_set)):
+        r[t,:] = 1.3
+    for t in range(int(3//delta_t)):
+        r[t,:] = 1.3*ogive(0,0.5,t*delta_t - 1.5)
+    #for i in range(len(t_set)):
+        r[:,30]=0
     #un perturb by heading
     for i in range(30):
         phi[:,i] = 0
@@ -180,12 +182,6 @@ def animate_everyone():
 S = np.array([])
 all_together(0,S)
 all_together(1,S)
-plt.scatter(position[0,:,0], position[0,:,1])
-for i in range(31):
-    #plt.annotate(angle(i,30,0)*180/pi, (position[0,i,0], position[0,i,1]))
-    plt.annotate((i,angle(i,30,3)*180/pi), (position[3,i,0], position[3,i,1]))
-    #print(angle(i,30,0)*180/pi)
-plt.show()
 #define subset S for experiment 1 Near 3, heading
 S = np.random.choice([2,3,4,5],3, replace=False)
 all_together(2,S)
@@ -229,6 +225,8 @@ all_together(4,S,h=False, speed =True)
 #define subset S for experiment 1 Near 12, speed
 S = np.concatenate((np.array([1,2,3,4,5]),np.random.choice([15,16,17,18,19,20,21],7, replace=False)))
 all_together(5,S,h=False, speed =True)
+plt.plot(t_set,r[:,1])
+plt.show()
 #define subset S for experiment 1 Far 3, speed
 S = np.random.choice([16,17,18,19,20],3, replace=False)
 all_together(6,S,h=False, speed =True)
