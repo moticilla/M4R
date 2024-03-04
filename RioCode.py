@@ -18,18 +18,20 @@ k = 20
 delta_t = 0.3/k
 a = 9.2
 w_var = 1.3
-c = 3.61
+c = 36.1
 t_set    = np.arange(0, t_max, delta_t)
 position = np.zeros((len(t_set), n, 2))
 phi      = np.zeros((len(t_set),n))
 r        = np.zeros((len(t_set),n)) #this is r dot not r
-def d(position,p,t):
-    return np.sqrt((position[t,p,0]-position[t,:,0])**2 + (position[t,p,1]-position[t,:,1])**2)
-def angle(position,p,t):
-    theta = np.arctan(np.absolute(position[t,:,1]-position[t,p,1])/ (position[t,:,0] - position[t,p,0]))
+copy_phi = phi
+copy_r = r
+def d(pos,position,p,t):
+    return np.sqrt((position[t,p,0]-pos[t,:,0])**2 + (position[t,p,1]-pos[t,:,1])**2)
+def angle(pos,position,p,t):
+    theta = np.arctan(np.absolute(pos[t,:,1]-position[t,p,1])/ (pos[t,:,0] - position[t,p,0]))
     return (np.absolute(phi[t,p]-theta)-pi/2)*np.sign(theta) + pi/2
-def w(position,p,t):
-    dis = d(position,p,t)
+def w(pos,p,t):
+    dis = d(pos,position,p,t)
     return ( a/(np.exp(w_var * dis)+a) )
 def ogive(mu, sigma,t):
     return 0.5 *(1+special.erf((t-mu)/sigma*np.sqrt(2)))
@@ -38,12 +40,12 @@ def perturb(S, t, sign = 1, Heading = True, Speed = False):
     for i in S:
         if Heading == True:
             #for all_t in range(int(t//delta_t),len(t_set)):
-            phi[int(t//delta_t):len(t_set), i] = sign*(10/360)*2*pi
+            phi[int(t//delta_t):, i] = sign*(10/360)*2*pi
             for t_step in range(int(0.5//delta_t)):
                 phi[int(t//delta_t)+t_step,i] = sign*(10/360)*2*pi*ogive(t,0.083,t_step*delta_t-0.25)
         if Speed   == True:
             #for all_t in range(int(t//delta_t),len(t_set)):
-            r[int(t//delta_t):len(t_set), i] = r[int(t//delta_t),i]   + sign*0.3
+            r[int(t//delta_t):, i] += sign*0.3
             for t_step in range(int(0.5//delta_t)):
                 r[int(t//delta_t)+t_step,i]   = r[int(t//delta_t),i]   + sign*0.3*ogive(t,0.083,t_step*delta_t-0.25)
 
@@ -56,13 +58,13 @@ for i in range(14,30):
     position[0,i,1] = normalvariate(3.5,0.15)*np.cos(normalvariate((i-14)*pi/8,(8/360)*2*pi))
 position[0,30,0] = 0
 position[0,30,1] = 0
-plt.scatter(position[0,:,0], position[0,:,1])
+'''plt.scatter(position[0,:,0], position[0,:,1])
 for i in range(31):
     #plt.annotate(angle(position,30,0)[i]*180/pi, (position[0,i,0], position[0,i,1]))
     plt.annotate((i,angle(position,30,0)[i]*180/pi), (position[0,i,0], position[0,i,1]))
     #print(angle(position,30,0)[i]*180/pi)
 plt.show()
-
+'''
 def move_person():
     total_distance = 0
     t = 1
@@ -76,9 +78,10 @@ def move_person():
         localN   = 0
         phi_sum  = 0
         r_sum    = 0
-        dis = d(position,p,t-1)
-        ang = angle(position,p,t-1)
-        w_i      = w(position,p,t-1)
+        reduced_position = position[:,:30,:]
+        dis = d(reduced_position,position,p,t-1)
+        ang = angle(reduced_position,position,p,t-1)
+        w_i = w(reduced_position,p,t-1)
         for i in range(30):
             if (dis[i]< d_max) and (np.absolute(ang[i])<angle_max) and (i != p):
                 localN  += 1
@@ -101,34 +104,38 @@ for t in range(int(3//delta_t)):
     r[t,:30] = 1.3*ogive(0,0.5,t*delta_t - 1.5)
 
 my_exp1_final_heading_data = [[1,2,3,0,0,0,0,0,0,0],[1,2,3,0,0,0,0,0,0,0]]
-def all_together(i,S, h=True, speed =False):
+def all_together(i,S, h=True, s =False):
     global position
     global phi
     global r
+    global copy_phi
+    global copy_r
     #make the perturbed set change heading up after total of 5 seconds
-    perturb(S, 5,Heading = h, Speed = speed)
+    perturb(S, 5,Heading = h, Speed = s)
     #get position of virtual neighbours from the perturbed speed and heading
     for t in range(1, len(t_set)):
         #for p in range(n):
             distance        = r * delta_t
-            position[t,:,0] = position[t-1,:,0] + distance[t-1,:]*np.cos(phi[t-1,:])
-            position[t,:,1] = position[t-1,:,1] + distance[t-1,:]*np.sin(phi[t-1,:])
+            position[t,:30,0] = position[t-1,:30,0] + distance[t-1,:30]*np.cos(phi[t-1,:30])
+            position[t,:30,1] = position[t-1,:30,1] + distance[t-1,:30]*np.sin(phi[t-1,:30])
     #move the "real" person (for 12m)
     move_person()
     #find the t that corresponds with stopping after 12m
     final_t = 3
     while r[final_t,30] >0 and final_t<1000:
         final_t+=1
-    print(final_t)
     #update dataframe
     if h == True:
         my_exp1_final_heading_data[0][i]=phi[final_t-1,30]*360/(2*pi)
-    if speed ==True:
+    if s ==True:
         my_exp1_final_heading_data[1][i]=r[final_t-1,30]
+
+    copy_phi = phi
+    copy_r = r
     #un perturb virtual people by speed
     #for i in range(30):
     #for t in range(int(3//delta_t),len(t_set)):
-    r[int(3//delta_t):len(t_set),:] = 1.3
+    r[int(3//delta_t):,:] = 1.3
     for t in range(int(3//delta_t)):
         r[t,:] = 1.3*ogive(0,0.5,t*delta_t - 1.5)
     #for t in range(len(t_set)):
@@ -208,37 +215,57 @@ all_together(8,S)
 #define subset S for experiment 1 Far 12, heading
 S = np.concatenate((np.array([15,16,17,18,19,20,21]),np.random.choice([1,2,3,4,5],5, replace=False)))
 all_together(9,S)
+plt.plot(t_set,(180/pi)*copy_phi[:,30], color = 'b')
+for i in range(30):
+    plt.plot(t_set,(180/pi)*copy_phi[:,i], color = 'r')
+plt.title("Heading for near 12 heading perturbed")
+plt.show()
+plt.plot(t_set,copy_r[:,30], color = 'b')
+for i in range(30):
+    plt.plot(t_set,copy_r[:,i], color = 'r')
+plt.title("speed for near 12 heading perturbed")
+plt.show()
 
 #define subset S for experiment 1 Near 0,Far 0, speed
 S = np.array([])
-all_together(0,S,h=False, speed =True)
-all_together(1,S,h=False, speed =True)
+all_together(0,S,h=False, s =True)
+all_together(1,S,h=False, s =True)
 #define subset S for experiment 1 Near 3, speed
 S = np.random.choice([2,3,4,5],3, replace=False)
-all_together(2,S,h=False, speed =True)
+all_together(2,S,h=False, s =True)
 #define subset S for experiment 1 Near 6, speed
 S = np.concatenate((np.array([2,3,4,5]),np.random.choice([16,17,18,19,20],2, replace=False)))
-all_together(3,S,h=False, speed =True)
+all_together(3,S,h=False, s =True)
 #define subset S for experiment 1 Near 9, speed
 S = np.concatenate((np.array([2,3,4,5]),np.random.choice([16,17,18,19,20],5, replace=False)))
-all_together(4,S,h=False, speed =True)
+all_together(4,S,h=False, s =True)
 #define subset S for experiment 1 Near 12, speed
 S = np.concatenate((np.array([1,2,3,4,5]),np.random.choice([15,16,17,18,19,20,21],7, replace=False)))
-all_together(5,S,h=False, speed =True)
-plt.plot(t_set,r[:,1])
+all_together(5,S,h=False, s =True)
+plt.plot(t_set,(180/pi)*copy_phi[:,30], color = 'b')
+for i in range(30):
+    plt.plot(t_set,(180/pi)*copy_phi[:,i], color = 'r')
+plt.title("Heading for near 12 speed perturbed")
 plt.show()
+plt.plot(t_set,copy_r[:,30], color = 'b')
+for i in range(30):
+    plt.plot(t_set,copy_r[:,i], color = 'r')
+plt.title("speed for near 12 speed perturbed")
+plt.show()
+print(copy_r[:,30])
+animate_everyone()
 #define subset S for experiment 1 Far 3, speed
 S = np.random.choice([16,17,18,19,20],3, replace=False)
-all_together(6,S,h=False, speed =True)
+all_together(6,S,h=False, s =True)
 #define subset S for experiment 1 Far 6, speed
 S = np.random.choice([15,16,17,18,19,20,21],6, replace=False)
-all_together(7,S,h=False, speed =True)
+all_together(7,S,h=False, s =True)
 #define subset S for experiment 1 Far 9, speed
 S = np.concatenate((np.array([15,16,17,18,19,20,21]),np.random.choice([1,2,3,4,5],2, replace=False)))
-all_together(8,S,h=False, speed =True)
+all_together(8,S,h=False, s =True)
 #define subset S for experiment 1 Far 12, speed
 S = np.concatenate((np.array([15,16,17,18,19,20,21]),np.random.choice([1,2,3,4,5],5, replace=False)))
-all_together(9,S,h=False, speed =True)
+all_together(9,S,h=False, s =True)
 
 
 #make dataFrame
@@ -308,7 +335,7 @@ y_far_speed = [my_exp1_final_heading_data[1][i] for i in [1,6,7,8,9]]
 plt.subplot(2, 1, 1)
 plt.plot(x,y_near_heading,color = 'g',label = 'My near')
 plt.plot(x,y_far_heading,color = 'y',label = 'My far')
-plt.title(f'My Final headings and speeds, k={k}, a={a}')
+plt.title(f'My Final headings and speeds, k={k}, a={a}, c={c}')
 plt.ylabel('Final lateral deviation')
 
 plt.subplot(2, 1, 2)
