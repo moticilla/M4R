@@ -13,12 +13,11 @@ n = 31
 d_max = 5
 pi = np.pi
 angle_max = pi/2
-k = 20
-#delta_t = 0.15/k
-delta_t = 0.3/k
+k = 150
+delta_t = 1/k
 a = 9.2
 w_var = 1.3
-c = 36.1
+c = 250
 t_set    = np.arange(0, t_max, delta_t)
 position = np.zeros((len(t_set), n, 2))
 phi      = np.zeros((len(t_set),n))
@@ -60,9 +59,7 @@ position[0,30,0] = 0
 position[0,30,1] = 0
 '''plt.scatter(position[0,:,0], position[0,:,1])
 for i in range(31):
-    #plt.annotate(angle(position,30,0)[i]*180/pi, (position[0,i,0], position[0,i,1]))
     plt.annotate((i,angle(position,30,0)[i]*180/pi), (position[0,i,0], position[0,i,1]))
-    #print(angle(position,30,0)[i]*180/pi)
 plt.show()
 '''
 def move_person():
@@ -71,8 +68,8 @@ def move_person():
     global phi
     global r
     global position
+    p = 30
     while total_distance<12 and t<len(t_set):
-        p = 30
         r[t,p]   = r[t-1,p]
         phi[t,p] = phi[t-1,p]
         localN   = 0
@@ -129,9 +126,8 @@ def all_together(i,S, h=True, s =False):
         my_exp1_final_heading_data[0][i]=phi[final_t-1,30]*360/(2*pi)
     if s ==True:
         my_exp1_final_heading_data[1][i]=r[final_t-1,30]
-
-    copy_phi = phi
-    copy_r = r
+    copy_phi = phi.copy()
+    copy_r = r.copy()
     #un perturb virtual people by speed
     #for i in range(30):
     #for t in range(int(3//delta_t),len(t_set)):
@@ -143,6 +139,7 @@ def all_together(i,S, h=True, s =False):
     #un perturb by heading
     #for i in range(30):
     phi[:,:30] = 0
+    return(copy_r,copy_phi,position)
 
 def animate_everyone():
     #animate the people moving over time:
@@ -214,7 +211,8 @@ all_together(8,S)
 #animate_everyone()
 #define subset S for experiment 1 Far 12, heading
 S = np.concatenate((np.array([15,16,17,18,19,20,21]),np.random.choice([1,2,3,4,5],5, replace=False)))
-all_together(9,S)
+copy_r,copy_phi,position = all_together(9,S)
+print(np.max(np.abs(r[:,30])))
 plt.plot(t_set,(180/pi)*copy_phi[:,30], color = 'b')
 for i in range(30):
     plt.plot(t_set,(180/pi)*copy_phi[:,i], color = 'r')
@@ -329,8 +327,8 @@ plt.xlabel('Number of perturbed neighours')
 
 y_near_heading = [my_exp1_final_heading_data[0][i] for i in [0,2,3,4,5]]
 y_far_heading = [my_exp1_final_heading_data[0][i] for i in [1,6,7,8,9]]
-y_near_speed = [my_exp1_final_heading_data[1][i] for i in [0,2,3,4,5]]
-y_far_speed = [my_exp1_final_heading_data[1][i] for i in [1,6,7,8,9]]
+y_near_speed = [my_exp1_final_heading_data[1][i]-0.3 for i in [0,2,3,4,5]]
+y_far_speed = [my_exp1_final_heading_data[1][i]-0.3 for i in [1,6,7,8,9]]
 
 plt.subplot(2, 1, 1)
 plt.plot(x,y_near_heading,color = 'g',label = 'My near')
