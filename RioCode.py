@@ -5,6 +5,7 @@ import pandas as pd
 from scipy import special
 import matplotlib.animation as animation
 import time
+from itertools import combinations
 
 start = time.time()
 #Variables:
@@ -50,18 +51,18 @@ def perturb(S, t, sign = 1, Heading = True, Speed = False):
 
 #set position of 30 neighbours for experiment 1 in two circles with real person in the middle
 for i in range(14):
-    position[0,i,0] = normalvariate(1.5,0.15)*np.sin(normalvariate(i*pi/7,(8/360)*2*pi))
-    position[0,i,1] = normalvariate(1.5,0.15)*np.cos(normalvariate(i*pi/7,(8/360)*2*pi))
+    position[0,i,0] = normalvariate(1.5,0.15)*np.cos(normalvariate(i*pi/7,(8/360)*2*pi))
+    position[0,i,1] = normalvariate(1.5,0.15)*np.sin(normalvariate(i*pi/7,(8/360)*2*pi))
 for i in range(14,30):
-    position[0,i,0] = normalvariate(3.5,0.15)*np.sin(normalvariate((i-14)*pi/8,(8/360)*2*pi))
-    position[0,i,1] = normalvariate(3.5,0.15)*np.cos(normalvariate((i-14)*pi/8,(8/360)*2*pi))
+    position[0,i,0] = normalvariate(3.5,0.15)*np.cos(normalvariate((i-14)*pi/8,(8/360)*2*pi))
+    position[0,i,1] = normalvariate(3.5,0.15)*np.sin(normalvariate((i-14)*pi/8,(8/360)*2*pi))
 position[0,30,0] = 0
 position[0,30,1] = 0
 '''plt.scatter(position[0,:,0], position[0,:,1])
 for i in range(31):
-    plt.annotate((i,angle(position,30,0)[i]*180/pi), (position[0,i,0], position[0,i,1]))
-plt.show()
-'''
+    plt.annotate((i,angle(position,position,30,0)[i]*180/pi), (position[0,i,0], position[0,i,1]))
+plt.show()'''
+
 def move_person():
     total_distance = 0
     t = 1
@@ -94,19 +95,19 @@ def move_person():
         t += 1
 
 #make all virtual people speed up to 1.3m/s in 3 s and then keep going
-#for i in range(30):
-#for t in range(int(3//delta_t),len(t_set)):
 r[int(3//delta_t):len(t_set),:30] = 1.3
 for t in range(int(3//delta_t)):
     r[t,:30] = 1.3*ogive(0,0.5,t*delta_t - 1.5)
 
-my_exp1_final_heading_data = [[1,2,3,0,0,0,0,0,0,0],[1,2,3,0,0,0,0,0,0,0]]
-def all_together(i,S, h=True, s =False):
+my_exp1_final_heading_data = [[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]]
+my_exp1_final_heading_data_opposite = [[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]]
+def all_together(i,S, data = my_exp1_final_heading_data, h=True, s =False):
     global position
     global phi
     global r
     global copy_phi
     global copy_r
+    global my_exp1_final_heading_data
     #make the perturbed set change heading up after total of 5 seconds
     perturb(S, 5,Heading = h, Speed = s)
     #get position of virtual neighbours from the perturbed speed and heading
@@ -123,9 +124,9 @@ def all_together(i,S, h=True, s =False):
         final_t+=1
     #update dataframe
     if h == True:
-        my_exp1_final_heading_data[0][i]=phi[final_t-1,30]*360/(2*pi)
+        data[0][i]+=phi[final_t-1,30]*360/(2*pi)
     if s ==True:
-        my_exp1_final_heading_data[1][i]=r[final_t-1,30]
+        data[1][i]+=r[final_t-1,30]
     copy_phi = phi.copy()
     copy_r = r.copy()
     #un perturb virtual people by speed
@@ -139,7 +140,7 @@ def all_together(i,S, h=True, s =False):
     #un perturb by heading
     #for i in range(30):
     phi[:,:30] = 0
-    return(copy_r,copy_phi,position)
+    return(copy_r,copy_phi,position,data)
 
 def animate_everyone():
     #animate the people moving over time:
@@ -182,36 +183,50 @@ def animate_everyone():
     ani = animation.FuncAnimation(fig=fig, func=update, frames=300, interval=0.2/delta_t)
     plt.show()
 
+my_exp1_final_heading_data[:][:]=0
 #define subset S for experiment 1 Near 0,Far 0, heading
 S = np.array([])
 all_together(0,S)
 all_together(1,S)
 #define subset S for experiment 1 Near 3, heading
-S = np.random.choice([2,3,4,5],3, replace=False)
-all_together(2,S)
+#S = np.random.choice([0,1,2,12,13],3, replace=False)
+for S in combinations([0,1,2,12,13], 3):
+    all_together(2,S)
+my_exp1_final_heading_data[0][2]=my_exp1_final_heading_data[0][2]/10
 #define subset S for experiment 1 Near 6, heading
-S = np.concatenate((np.array([2,3,4,5]),np.random.choice([16,17,18,19,20],2, replace=False)))
-all_together(3,S)
-#animate_everyone()
+#S = np.concatenate((np.array([0,1,2,12,13]),np.random.choice([14,15,16,17,27,28,29],2, replace=False)))
+for i in combinations([14,15,16,17,27,28,29],1):
+    S = np.concatenate((np.array([0,1,2,12,13]), np.array(i)))
+    all_together(3,S)
+my_exp1_final_heading_data[0][3]=my_exp1_final_heading_data[0][3]/7
 #define subset S for experiment 1 Near 9, heading
-S = np.concatenate((np.array([2,3,4,5]),np.random.choice([16,17,18,19,20],5, replace=False)))
-all_together(4,S)
+#S = np.concatenate((np.array([0,1,2,12,13]),np.random.choice([14,15,16,17,27,28,29],4, replace=False)))
+for i in combinations([14,15,16,17,27,28,29],4):
+    S = np.concatenate((np.array([0,1,2,12,13]), np.array(i)))
+    all_together(4,S)
+my_exp1_final_heading_data[0][4]=my_exp1_final_heading_data[0][4]/35
 #define subset S for experiment 1 Near 12, heading
-S = np.concatenate((np.array([1,2,3,4,5]),np.random.choice([15,16,17,18,19,20,21],7, replace=False)))
+S = np.concatenate((np.array([0,1,2,12,13]),np.array([14,15,16,17,27,28,29])))
 all_together(5,S)
 #define subset S for experiment 1 Far 3, heading
-S = np.random.choice([16,17,18,19,20],3, replace=False)
-all_together(6,S)
+#S = np.random.choice([14,15,16,17,27,28,29],3, replace=False)
+for S in combinations([14,15,16,17,27,28,29],3):
+    all_together(6,S)
+my_exp1_final_heading_data[0][6]=my_exp1_final_heading_data[0][6]/35
 #define subset S for experiment 1 Far 6, heading
-S = np.random.choice([15,16,17,18,19,20,21],6, replace=False)
-all_together(7,S)
+#S = np.random.choice([14,15,16,17,27,28,29],6, replace=False)
+for S in combinations([14,15,16,17,27,28,29],6):
+    all_together(7,S)
+my_exp1_final_heading_data[0][7]=my_exp1_final_heading_data[0][7]/7
 #define subset S for experiment 1 Far 9, heading
-S = np.concatenate((np.array([15,16,17,18,19,20,21]),np.random.choice([1,2,3,4,5],2, replace=False)))
-all_together(8,S)
-#animate_everyone()
+#S = np.concatenate((np.array([14,15,16,17,27,28,29]),np.random.choice([0,1,2,12,13],2, replace=False)))
+for i in combinations([0,1,2,12,13],2):
+    S = np.concatenate((np.array([14,15,16,17,27,28,29]), np.array(i)))
+    all_together(8,S)
+my_exp1_final_heading_data[0][8]=my_exp1_final_heading_data[0][8]/10
 #define subset S for experiment 1 Far 12, heading
-S = np.concatenate((np.array([15,16,17,18,19,20,21]),np.random.choice([1,2,3,4,5],5, replace=False)))
-copy_r,copy_phi,position = all_together(9,S)
+S = np.concatenate((np.array([14,15,16,17,27,28,29]),np.array([0,1,2,12,13])))
+copy_r,copy_phi,position,my_exp1_final_heading_data = all_together(9,S)
 print(np.max(np.abs(r[:,30])))
 plt.plot(t_set,(180/pi)*copy_phi[:,30], color = 'b')
 for i in range(30):
@@ -229,16 +244,25 @@ S = np.array([])
 all_together(0,S,h=False, s =True)
 all_together(1,S,h=False, s =True)
 #define subset S for experiment 1 Near 3, speed
-S = np.random.choice([2,3,4,5],3, replace=False)
-all_together(2,S,h=False, s =True)
+#S = np.random.choice([0,1,2,12,13],3, replace=False)
+for S in combinations([0,1,2,12,13],3):
+    all_together(2,S,h=False, s =True)
+my_exp1_final_heading_data[1][2]=my_exp1_final_heading_data[1][2]/10
 #define subset S for experiment 1 Near 6, speed
-S = np.concatenate((np.array([2,3,4,5]),np.random.choice([16,17,18,19,20],2, replace=False)))
-all_together(3,S,h=False, s =True)
+#S = np.concatenate((np.array([0,1,2,12,13]),np.random.choice([14,15,16,17,27,28,29],1, replace=False)))
+for i in combinations([14,15,16,17,27,28,29],1):
+    S = np.concatenate((np.array([0,1,2,12,13]), np.array(i)))
+    all_together(3,S,h=False, s =True)
+my_exp1_final_heading_data[1][3]=my_exp1_final_heading_data[1][3]/7
 #define subset S for experiment 1 Near 9, speed
-S = np.concatenate((np.array([2,3,4,5]),np.random.choice([16,17,18,19,20],5, replace=False)))
+#S = np.concatenate((np.array([0,1,2,12,13]),np.random.choice([14,15,16,17,27,28,29],4, replace=False)))
 all_together(4,S,h=False, s =True)
+for i in combinations([14,15,16,17,27,28,29],4):
+    S = np.concatenate((np.array([0,1,2,12,13]), np.array(i)))
+    all_together(4,S,h=False, s =True)
+my_exp1_final_heading_data[1][4]=my_exp1_final_heading_data[1][4]/35
 #define subset S for experiment 1 Near 12, speed
-S = np.concatenate((np.array([1,2,3,4,5]),np.random.choice([15,16,17,18,19,20,21],7, replace=False)))
+S = np.concatenate((np.array([0,1,2,12,13]),np.array([14,15,16,17,27,28,29])))
 all_together(5,S,h=False, s =True)
 plt.plot(t_set,(180/pi)*copy_phi[:,30], color = 'b')
 for i in range(30):
@@ -253,16 +277,23 @@ plt.show()
 print(copy_r[:,30])
 animate_everyone()
 #define subset S for experiment 1 Far 3, speed
-S = np.random.choice([16,17,18,19,20],3, replace=False)
-all_together(6,S,h=False, s =True)
+#S = np.random.choice([14,15,16,17,27,28,29],3, replace=False)
+for S in combinations([14,15,16,17,27,28,29],3):
+    all_together(6,S,h=False, s =True)
+my_exp1_final_heading_data[1][6]=my_exp1_final_heading_data[1][6]/35
 #define subset S for experiment 1 Far 6, speed
-S = np.random.choice([15,16,17,18,19,20,21],6, replace=False)
-all_together(7,S,h=False, s =True)
+#S = np.random.choice([14,15,16,17,27,28,29],6, replace=False)
+for S in combinations([14,15,16,17,27,28,29],6):
+    all_together(7,S,h=False, s =True)
+my_exp1_final_heading_data[1][7]=my_exp1_final_heading_data[1][7]/7
 #define subset S for experiment 1 Far 9, speed
-S = np.concatenate((np.array([15,16,17,18,19,20,21]),np.random.choice([1,2,3,4,5],2, replace=False)))
-all_together(8,S,h=False, s =True)
+#S = np.concatenate((np.array([14,15,16,17,27,28,29]),np.random.choice([0,1,2,12,13],2, replace=False)))
+for i in combinations([0,1,2,12,13],2):
+    S = np.concatenate((np.array([14,15,16,17,27,28,29]), np.array(i)))
+    all_together(8,S,h=False, s =True)
+my_exp1_final_heading_data[1][8]=my_exp1_final_heading_data[1][8]/10
 #define subset S for experiment 1 Far 12, speed
-S = np.concatenate((np.array([15,16,17,18,19,20,21]),np.random.choice([1,2,3,4,5],5, replace=False)))
+S = np.concatenate((np.array([14,15,16,17,27,28,29]),np.array([0,1,2,12,13])))
 all_together(9,S,h=False, s =True)
 
 
