@@ -15,7 +15,7 @@ d_max = 5
 pi = np.pi
 angle_max = pi/2
 k = 100
-delta_t = 1/k
+delta_t = 0.6/k
 a = 9.2
 w_var = 1.3
 c = 250
@@ -100,8 +100,8 @@ r[int(3//delta_t):len(t_set),:30] = 1.3
 for t in range(int(3//delta_t)):
     r[t,:30] = 1.3*ogive(0,0.5,t*delta_t - 1.5)
 
-my_exp1_final_heading_data = [[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]]
-my_exp1_final_heading_data_opposite = [[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]]
+my_exp1_final_heading_data          = np.array([[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]])
+my_exp1_final_heading_data_opposite = np.array([[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]])
 
 def all_together(i,S,position, phi, r, copy_position, copy_phi, copy_r, 
                  data = my_exp1_final_heading_data, h=True, s =False, sign2 = 1):
@@ -209,9 +209,10 @@ y_far_speed_paper = [exp1_final_speed.Far0[11],exp1_final_speed.Far3[11],exp1_fi
 y_near_heading_paper = [exp1_final_heading.Near0[11],exp1_final_heading.Near3[11],exp1_final_heading.Near6[11],exp1_final_heading.Near9[11],exp1_final_heading.Near12[11]]
 y_far_heading_paper = [exp1_final_heading.Far0[11],exp1_final_heading.Far3[11],exp1_final_heading.Far6[11],exp1_final_heading.Far9[11],exp1_final_heading.Far12[11]]
 
-def create_final_graph(position, phi, r, copy_position, copy_phi, copy_r, 
+def create_final_speed_heading(position, phi, r, copy_position, copy_phi, copy_r, 
                  data3=my_exp1_final_heading_data, sign3=1):
     #define subset S for experiment 1 Near 0,Far 0, heading
+    data3[:][:] = 0
     S = np.array([])
     position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(0,S,position, phi, r, copy_position, copy_phi, copy_r, data = data3, sign2 =sign3)
     position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(1,S,position, phi, r, copy_position, copy_phi, copy_r, data = data3, sign2 =sign3)
@@ -253,7 +254,7 @@ def create_final_graph(position, phi, r, copy_position, copy_phi, copy_r,
     data3[0][8]=data3[0][8]/10
     #define subset S for experiment 1 Far 12, heading
     S = np.concatenate((np.array([14,15,16,17,27,28,29]),np.array([0,1,2,12,13])))
-    position, phi, r, copy_position, copy_phi, copy_r, data = all_together(9,S,position, phi, r, copy_position, copy_phi, copy_r, data = data3, sign2 =sign3)
+    position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(9,S,position, phi, r, copy_position, copy_phi, copy_r, data = data3, sign2 =sign3)
     '''print(np.max(np.abs(r[:,30])))
     plt.plot(t_set,(180/pi)*copy_phi[:,30], color = 'b')
     for i in range(30):
@@ -268,7 +269,6 @@ def create_final_graph(position, phi, r, copy_position, copy_phi, copy_r,
 
     #define subset S for experiment 1 Near 0,Far 0, speed
     S = np.array([])
-
     position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(0,S,position, phi, r, copy_position, copy_phi, copy_r, h=False, s =True, data = data3, sign2 =sign3)
     position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(1,S,position, phi, r, copy_position, copy_phi, copy_r, h=False, s =True, data = data3, sign2 =sign3)
     #define subset S for experiment 1 Near 3, speed
@@ -321,7 +321,18 @@ def create_final_graph(position, phi, r, copy_position, copy_phi, copy_r,
     #define subset S for experiment 1 Far 12, speed
     S = np.concatenate((np.array([14,15,16,17,27,28,29]),np.array([0,1,2,12,13])))
     position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(9,S,position, phi, r, copy_position, copy_phi, copy_r, h=False, s =True, data = data3, sign2 =sign3)
+    
+    global y_near_heading_my
+    global y_near_speed_my
+    global y_far_heading_my
+    global y_far_speed_my
+    y_near_heading_my = [data3[0][i] for i in [0,2,3,4,5]]
+    y_far_heading_my = [data3[0][i] for i in [1,6,7,8,9]]
+    y_near_speed_my = [data3[1][i]-0.3 for i in [0,2,3,4,5]]
+    y_far_speed_my = [data3[1][i]-0.3 for i in [1,6,7,8,9]]
+    return(y_near_heading_my,y_near_speed_my,y_far_heading_my,y_far_speed_my,data3)
 
+def create_comparison_graph(y_near_heading_my, y_near_speed_my, y_far_heading_my, y_far_speed_my):
     plt.subplot(2, 1, 1)
     plt.plot(x,y_near_heading_paper,color = 'b',label = 'Paper near')
     plt.plot(x,y_far_heading_paper,color = 'r', label = 'paper far')
@@ -334,16 +345,6 @@ def create_final_graph(position, phi, r, copy_position, copy_phi, copy_r,
     plt.ylabel('Final change in speed')
     plt.xlabel('Number of perturbed neighours')
 
-    
-    global y_near_heading_my
-    global y_near_speed_my
-    global y_far_heading_my
-    global y_far_speed_my
-    y_near_heading_my = [data3[0][i] for i in [0,2,3,4,5]]
-    y_far_heading_my = [data3[0][i] for i in [1,6,7,8,9]]
-    y_near_speed_my = [data3[1][i]-0.3 for i in [0,2,3,4,5]]
-    y_far_speed_my = [data3[1][i]-0.3 for i in [1,6,7,8,9]]
-    '''
     plt.subplot(2, 1, 1)
     plt.plot(x,y_near_heading_my,color = 'g',label = 'My near')
     plt.plot(x,y_far_heading_my,color = 'y',label = 'My far')
@@ -355,12 +356,6 @@ def create_final_graph(position, phi, r, copy_position, copy_phi, copy_r,
     plt.plot(x,y_far_speed_my,color = 'y', label = 'My far')
     plt.ylabel('Final change in speed')
     plt.xlabel('Number of perturbed neighours')
-
-    plt.show()'''
-    return(y_near_heading_my,y_near_speed_my,y_far_heading_my,y_far_speed_my,data3)
-
-#y_near_heading_my,y_near_speed_my,y_far_heading_my,y_far_speed_my,my_exp1_final_heading_data = create_final_graph(position, phi, r, copy_position, copy_phi, copy_r, data3=my_exp1_final_heading_data, sign3=1)
-#y_near_heading_my,y_near_speed_my,y_far_heading_my,y_far_speed_my,my_exp1_final_heading_data_opposite = create_final_graph(position, phi, r, copy_position, copy_phi, copy_r, data3=my_exp1_final_heading_data_opposite, sign3=-1)
 
 def similarity_func(y_near_speed_paper, y_near_speed_my, y_far_speed_paper, y_far_speed_my, y_near_heading_paper, 
                     y_near_heading_my, y_far_heading_paper,  y_far_heading_my, speed = True, heading = False):
@@ -376,23 +371,61 @@ def similarity_func(y_near_speed_paper, y_near_speed_my, y_far_speed_paper, y_fa
             sum += np.absolute(y_far_heading_paper[i]  - y_far_heading_my[i])
     return sum
 
-k_range = np.arange(3,300,50)
-c_range = np.arange(3,300,50)
+'''k,c = 150,200
+y_near_heading_my,y_near_speed_my,y_far_heading_my,y_far_speed_my,my_exp1_final_heading_data = create_final_speed_heading(position, phi, r, copy_position, copy_phi, copy_r, data3=my_exp1_final_heading_data, sign3=1)
+#y_near_heading_my,y_near_speed_my,y_far_heading_my,y_far_speed_my,my_exp1_final_heading_data_opposite = create_final_speed_heading(position, phi, r, copy_position, copy_phi, copy_r, data3=my_exp1_final_heading_data_opposite, sign3=-1)
+create_comparison_graph(y_near_heading_my, y_near_speed_my, y_far_heading_my, y_far_speed_my)
+plt.show()
+#print(similarity_func(y_near_speed_paper, y_near_speed_my,y_far_speed_paper, y_far_speed_my, 
+ #                                                   y_near_heading_paper, y_near_heading_my,y_far_heading_paper,  y_far_heading_my,
+  #                                                  speed = False, heading = True))
+k_range = np.array([100,200])
+kc_results_speed = np.zeros(len(k_range))
+kc_results_direction = np.zeros(len(k_range))
+
+for i in range(len(k_range)):
+    k,c = k_range[i], k_range[i]
+    
+    y_near_heading_my,y_near_speed_my,y_far_heading_my,y_far_speed_my,my_exp1_final_heading_data = create_final_speed_heading(position, phi, r, copy_position, copy_phi, copy_r, data3=my_exp1_final_heading_data, sign3=1)
+    kc_results_speed[i] = similarity_func(y_near_speed_paper, y_near_speed_my, y_far_speed_paper, y_far_speed_my, 
+                                            y_near_heading_paper, y_near_heading_my,y_far_heading_paper,  y_far_heading_my,
+                                            speed = True, heading = False)
+    kc_results_direction[i] = similarity_func(y_near_speed_paper, y_near_speed_my,y_far_speed_paper, y_far_speed_my, 
+                                                y_near_heading_paper, y_near_heading_my,y_far_heading_paper,  y_far_heading_my,
+                                                speed = False, heading = True)
+    create_comparison_graph(y_near_heading_my, y_near_speed_my, y_far_heading_my, y_far_speed_my)
+plt.show()
+'''
+
+number = 4
+k_range = np.linspace(10,50,num=number)
+c_range = np.linspace(10,50,num=number)
 k_matrix = np.vstack((k_range,k_range,k_range,k_range,k_range,k_range))
 c_matrix = np.transpose(k_matrix)
-kc_results = np.zeros((len(k_range),len(c_range)))
-for i in range(6):
-    for j in range(6):
+kc_results_speed = np.zeros((len(k_range),len(c_range)))
+kc_results_direction = np.zeros((len(k_range),len(c_range)))
+print(k_matrix)
+print(c_matrix)
+for i in range(number):
+    for j in range(number):
         k = k_matrix[i,j]
         c = c_matrix[i,j]
-        y_near_heading_my,y_near_speed_my,y_far_heading_my,y_far_speed_my,my_exp1_final_heading_data = create_final_graph(position, phi, r, copy_position, copy_phi, copy_r, data3=my_exp1_final_heading_data, sign3=1)
-        kc_results[i,j] = similarity_func(y_near_speed_paper, y_near_speed_my, 
-                                          y_far_speed_paper, y_far_speed_my, 
-                                          y_near_heading_paper, y_near_heading_my, 
-                                          y_far_heading_paper,  y_far_heading_my)
-print(kc_results)
-#creat_final called 36 times and within that all_toegther is ccalled 216 times so count gets to 7776
+        y_near_heading_my,y_near_speed_my,y_far_heading_my,y_far_speed_my,my_exp1_final_heading_data = create_final_speed_heading(position, phi, r, copy_position, copy_phi, copy_r, data3=my_exp1_final_heading_data, sign3=1)
+        kc_results_speed[i,j] = similarity_func(y_near_speed_paper, y_near_speed_my, y_far_speed_paper, y_far_speed_my, 
+                                                y_near_heading_paper, y_near_heading_my,y_far_heading_paper,  y_far_heading_my,
+                                                speed = True, heading = False)
+        kc_results_direction[i,j] = similarity_func(y_near_speed_paper, y_near_speed_my,y_far_speed_paper, y_far_speed_my, 
+                                                    y_near_heading_paper, y_near_heading_my,y_far_heading_paper,  y_far_heading_my,
+                                                    speed = False, heading = True)
+        create_comparison_graph(y_near_heading_my, y_near_speed_my, y_far_heading_my, y_far_speed_my)
+plt.show()
+
+print("K, C matrix for speed")
+print(kc_results_speed)
+print("K, C Matrix for direction")
+print(kc_results_direction)
+#create_final called 36 times and within that all_toegther is called 216 times so count gets to 7776
 
 end = time.time()
 print("The time of execution of above program is :",
-      (end-start) * 10**3, "ms")
+      (end-start), "s",(end-start)/60, "minutes" )
