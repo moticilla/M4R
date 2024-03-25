@@ -100,8 +100,8 @@ r[int(3//delta_t):len(t_set),:30] = 1.3
 for t in range(int(3//delta_t)):
     r[t,:30] = 1.3*ogive(0,0.5,t*delta_t - 1.5)
 
-my_exp1_final_heading_data          = np.array([[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]])
-my_exp1_final_heading_data_opposite = np.array([[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]])
+my_exp1_final_heading_data          = np.array([[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]], dtype=float)
+my_exp1_final_heading_data_opposite = np.array([[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]], dtype=float)
 
 def all_together(i,S,position, phi, r, copy_position, copy_phi, copy_r, 
                  data = my_exp1_final_heading_data, h=True, s =False, sign2 = 1):
@@ -124,9 +124,9 @@ def all_together(i,S,position, phi, r, copy_position, copy_phi, copy_r,
         final_t+=1
     #update dataframe
     if h == True:
-        data[0][i]+=phi[final_t-1,30]*360/(2*pi)
+        data[0,i]+=phi[final_t-1,30]*360/(2*pi)
     if s ==True:
-        data[1][i]+=r[final_t-1,30]
+        data[1,i]+=r[final_t-1,30]
     copy_phi = phi.copy()
     copy_r = r.copy()
     copy_position = position.copy()
@@ -212,7 +212,7 @@ y_far_heading_paper = [exp1_final_heading.Far0[11],exp1_final_heading.Far3[11],e
 def create_final_speed_heading(position, phi, r, copy_position, copy_phi, copy_r, 
                  data3=my_exp1_final_heading_data, sign3=1):
     #define subset S for experiment 1 Near 0,Far 0, heading
-    data3[:][:] = 0
+    data3[:,:] = 0
     S = np.array([])
     position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(0,S,position, phi, r, copy_position, copy_phi, copy_r, data = data3, sign2 =sign3)
     position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(1,S,position, phi, r, copy_position, copy_phi, copy_r, data = data3, sign2 =sign3)
@@ -220,19 +220,19 @@ def create_final_speed_heading(position, phi, r, copy_position, copy_phi, copy_r
     #S = np.random.choice([0,1,2,12,13],3, replace=False)
     for S in combinations([0,1,2,12,13], 3):
         position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(2,S,position, phi, r, copy_position, copy_phi, copy_r, data = data3, sign2 =sign3)
-    data3[0][2]=data3[0][2]/10
+    data3[0,2]=data3[0,2]/10
     #define subset S for experiment 1 Near 6, heading
     #S = np.concatenate((np.array([0,1,2,12,13]),np.random.choice([14,15,16,17,27,28,29],2, replace=False)))
     for i in combinations([14,15,16,17,27,28,29],1):
         S = np.concatenate((np.array([0,1,2,12,13]), np.array(i)))
         position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(3,S,position, phi, r, copy_position, copy_phi, copy_r, data = data3, sign2 =sign3)
-    data3[0][3]=data3[0][3]/7
+    data3[0,3]=data3[0,3]/7
     #define subset S for experiment 1 Near 9, heading
     #S = np.concatenate((np.array([0,1,2,12,13]),np.random.choice([14,15,16,17,27,28,29],4, replace=False)))
     for i in combinations([14,15,16,17,27,28,29],4):
         S = np.concatenate((np.array([0,1,2,12,13]), np.array(i)))
         position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(4,S,position, phi, r, copy_position, copy_phi, copy_r, data = data3, sign2 =sign3)
-    data3[0][4]=data3[0][4]/35
+    data3[0,4]=data3[0,4]/35
     #define subset S for experiment 1 Near 12, heading
     S = np.concatenate((np.array([0,1,2,12,13]),np.array([14,15,16,17,27,28,29])))
     position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(5,S,position, phi, r, copy_position, copy_phi, copy_r, data = data3, sign2 =sign3)
@@ -240,18 +240,18 @@ def create_final_speed_heading(position, phi, r, copy_position, copy_phi, copy_r
     #S = np.random.choice([14,15,16,17,27,28,29],3, replace=False)
     for S in combinations([14,15,16,17,27,28,29],3):
         position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(6,S,position, phi, r, copy_position, copy_phi, copy_r, data = data3, sign2 =sign3)
-    data3[0][6]=data3[0][6]/35
+    data3[0,6]=data3[0,6]/35
     #define subset S for experiment 1 Far 6, heading
     #S = np.random.choice([14,15,16,17,27,28,29],6, replace=False)
     for S in combinations([14,15,16,17,27,28,29],6):
         position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(7,S,position, phi, r, copy_position, copy_phi, copy_r, data = data3, sign2 =sign3)
-    data3[0][7]=data3[0][7]/7
+    data3[0,7]=data3[0,7]/7
     #define subset S for experiment 1 Far 9, heading
     #S = np.concatenate((np.array([14,15,16,17,27,28,29]),np.random.choice([0,1,2,12,13],2, replace=False)))
     for i in combinations([0,1,2,12,13],2):
         S = np.concatenate((np.array([14,15,16,17,27,28,29]), np.array(i)))
         position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(8,S,position, phi, r, copy_position, copy_phi, copy_r, data = data3, sign2 =sign3)
-    data3[0][8]=data3[0][8]/10
+    data3[0,8]=data3[0,8]/10
     #define subset S for experiment 1 Far 12, heading
     S = np.concatenate((np.array([14,15,16,17,27,28,29]),np.array([0,1,2,12,13])))
     position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(9,S,position, phi, r, copy_position, copy_phi, copy_r, data = data3, sign2 =sign3)
@@ -275,19 +275,19 @@ def create_final_speed_heading(position, phi, r, copy_position, copy_phi, copy_r
     #S = np.random.choice([0,1,2,12,13],3, replace=False)
     for S in combinations([0,1,2,12,13],3):
         position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(2,S,position, phi, r, copy_position, copy_phi, copy_r, h=False, s =True, data = data3, sign2 =sign3)
-    data3[1][2]=data3[1][2]/10
+    data3[1,2]=data3[1,2]/10
     #define subset S for experiment 1 Near 6, speed
     #S = np.concatenate((np.array([0,1,2,12,13]),np.random.choice([14,15,16,17,27,28,29],1, replace=False)))
     for i in combinations([14,15,16,17,27,28,29],1):
         S = np.concatenate((np.array([0,1,2,12,13]), np.array(i)))
         position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(3,S,position, phi, r, copy_position, copy_phi, copy_r, h=False, s =True, data = data3, sign2 =sign3)
-    data3[1][3]=data3[1][3]/7
+    data3[1,3]=data3[1,3]/7
     #define subset S for experiment 1 Near 9, speed
     #S = np.concatenate((np.array([0,1,2,12,13]),np.random.choice([14,15,16,17,27,28,29],4, replace=False)))
     for i in combinations([14,15,16,17,27,28,29],4):
         S = np.concatenate((np.array([0,1,2,12,13]), np.array(i)))
         position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(4,S,position, phi, r, copy_position, copy_phi, copy_r, h=False, s =True, data = data3, sign2 =sign3)
-    data3[1][4]=data3[1][4]/35
+    data3[1,4]=data3[1,4]/35
     #define subset S for experiment 1 Near 12, speed
     S = np.concatenate((np.array([0,1,2,12,13]),np.array([14,15,16,17,27,28,29])))
     position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(5,S,position, phi, r, copy_position, copy_phi, copy_r, h=False, s =True, data = data3, sign2 =sign3)
@@ -306,18 +306,18 @@ def create_final_speed_heading(position, phi, r, copy_position, copy_phi, copy_r
     #S = np.random.choice([14,15,16,17,27,28,29],3, replace=False)
     for S in combinations([14,15,16,17,27,28,29],3):
         position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(6,S,position, phi, r, copy_position, copy_phi, copy_r, h=False, s =True, data = data3, sign2 =sign3)
-    data3[1][6]=data3[1][6]/35
+    data3[1,6]=data3[1,6]/35
     #define subset S for experiment 1 Far 6, speed
     #S = np.random.choice([14,15,16,17,27,28,29],6, replace=False)
     for S in combinations([14,15,16,17,27,28,29],6):
         position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(7,S,position, phi, r, copy_position, copy_phi, copy_r, h=False, s =True, data = data3, sign2 =sign3)
-    data3[1][7]=data3[1][7]/7
+    data3[1,7]=data3[1,7]/7
     #define subset S for experiment 1 Far 9, speed
     #S = np.concatenate((np.array([14,15,16,17,27,28,29]),np.random.choice([0,1,2,12,13],2, replace=False)))
     for i in combinations([0,1,2,12,13],2):
         S = np.concatenate((np.array([14,15,16,17,27,28,29]), np.array(i)))
         position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(8,S,position, phi, r, copy_position, copy_phi, copy_r, h=False, s =True, data = data3, sign2 =sign3)
-    data3[1][8]=data3[1][8]/10
+    data3[1,8]=data3[1,8]/10
     #define subset S for experiment 1 Far 12, speed
     S = np.concatenate((np.array([14,15,16,17,27,28,29]),np.array([0,1,2,12,13])))
     position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(9,S,position, phi, r, copy_position, copy_phi, copy_r, h=False, s =True, data = data3, sign2 =sign3)
@@ -326,10 +326,10 @@ def create_final_speed_heading(position, phi, r, copy_position, copy_phi, copy_r
     global y_near_speed_my
     global y_far_heading_my
     global y_far_speed_my
-    y_near_heading_my = [data3[0][i] for i in [0,2,3,4,5]]
-    y_far_heading_my = [data3[0][i] for i in [1,6,7,8,9]]
-    y_near_speed_my = [data3[1][i]-0.3 for i in [0,2,3,4,5]]
-    y_far_speed_my = [data3[1][i]-0.3 for i in [1,6,7,8,9]]
+    y_near_heading_my = [data3[0,i] for i in [0,2,3,4,5]]
+    y_far_heading_my = [data3[0,i] for i in [1,6,7,8,9]]
+    y_near_speed_my = [data3[1,i]-0.3 for i in [0,2,3,4,5]]
+    y_far_speed_my = [data3[1,i]-0.3 for i in [1,6,7,8,9]]
     return(y_near_heading_my,y_near_speed_my,y_far_heading_my,y_far_speed_my,data3)
 
 def create_comparison_graph(y_near_heading_my, y_near_speed_my, y_far_heading_my, y_far_speed_my):
@@ -398,8 +398,8 @@ plt.show()
 '''
 
 number = 4
-k_range = np.linspace(10,50,num=number)
-c_range = np.linspace(10,50,num=number)
+k_range = np.linspace(200,500,num=number)
+c_range = np.linspace(200,500,num=number)
 k_matrix = np.vstack((k_range,k_range,k_range,k_range,k_range,k_range))
 c_matrix = np.transpose(k_matrix)
 kc_results_speed = np.zeros((len(k_range),len(c_range)))
