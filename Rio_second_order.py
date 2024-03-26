@@ -29,12 +29,9 @@ def w(pos,p,t):
 def ogive(mu, sigma,t):
     return 0.5 *(1+special.erf((t-mu)/sigma*np.sqrt(2)))
 
-def move_person():
+def move_person(phi,r,position):
     total_distance = 0
     t = 1
-    global phi
-    global r
-    global position
     u = np.zeros((len(t_set),n)) #w = phi dot
     p = 30
     while total_distance<12 and t<len(t_set):
@@ -61,3 +58,4 @@ def move_person():
         position[t,p,0] = position[t-1,p,0] + distance[t-1,p]*np.cos(phi[t-1,p]*2*pi/360)
         position[t,p,1] = position[t-1,p,1] + distance[t-1,p]*np.sin(phi[t-1,p]*2*pi/360)
         t += 1
+    return phi,r,position

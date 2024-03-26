@@ -41,12 +41,10 @@ def perturb(S, t, phi,r,sign = 1, Heading = True, Speed = False):
     #S is the set of virtual neighbours to be perturbed either by speed or by heading at time t
     for i in S:
         if Heading == True:
-            #for all_t in range(int(t//delta_t),len(t_set)):
             phi[int(t//delta_t):, i] = sign*(10/360)*2*pi
             for t_step in range(int(0.5//delta_t)):
                 phi[int(t//delta_t)+t_step,i] = sign*(10/360)*2*pi*ogive(t,0.083,t_step*delta_t-0.25)
         if Speed   == True:
-            #for all_t in range(int(t//delta_t),len(t_set)):
             r[int(t//delta_t):, i] += sign*0.3
             for t_step in range(int(0.5//delta_t)):
                 r[int(t//delta_t)+t_step,i]   = r[int(t//delta_t),i]   + sign*0.3*ogive(t,0.083,t_step*delta_t-0.25)
@@ -54,11 +52,15 @@ def perturb(S, t, phi,r,sign = 1, Heading = True, Speed = False):
 
 #set position of 30 neighbours for experiment 1 in two circles with real person in the middle
 for i in range(14):
-    position[0,i,0] = normalvariate(1.5,0.15)*np.cos(normalvariate(i*pi/7,(8/360)*2*pi))
-    position[0,i,1] = normalvariate(1.5,0.15)*np.sin(normalvariate(i*pi/7,(8/360)*2*pi))
+    #position[0,i,0] = normalvariate(1.5,0.15)*np.cos(normalvariate(i*pi/7,(8/360)*2*pi))
+    #position[0,i,1] = normalvariate(1.5,0.15)*np.sin(normalvariate(i*pi/7,(8/360)*2*pi))
+    position[0,i,0] = 1.5*np.cos(i*pi/7)
+    position[0,i,1] = 1.5*np.sin(i*pi/7)
 for i in range(14,30):
-    position[0,i,0] = normalvariate(3.5,0.15)*np.cos(normalvariate((i-14)*pi/8,(8/360)*2*pi))
-    position[0,i,1] = normalvariate(3.5,0.15)*np.sin(normalvariate((i-14)*pi/8,(8/360)*2*pi))
+    #position[0,i,0] = normalvariate(3.5,0.15)*np.cos(normalvariate((i-14)*pi/8,(8/360)*2*pi))
+    #position[0,i,1] = normalvariate(3.5,0.15)*np.sin(normalvariate((i-14)*pi/8,(8/360)*2*pi))
+    position[0,i,0] = 3.5*np.cos((i-14)*pi/8)
+    position[0,i,1] = 3.5*np.sin((i-14)*pi/8)
 position[0,30,0] = 0
 position[0,30,1] = 0
 '''plt.scatter(position[0,:,0], position[0,:,1])
@@ -112,7 +114,6 @@ def all_together(i,S,position, phi, r, copy_position, copy_phi, copy_r,
     phi,r = perturb(S, 5, phi, r, Heading = h, Speed = s, sign = sign2)
     #get position of virtual neighbours from the perturbed speed and heading
     for t in range(1, len(t_set)):
-        #for p in range(n):
             distance        = r * delta_t
             position[t,:30,0] = position[t-1,:30,0] + distance[t-1,:30]*np.cos(phi[t-1,:30])
             position[t,:30,1] = position[t-1,:30,1] + distance[t-1,:30]*np.sin(phi[t-1,:30])
@@ -131,15 +132,11 @@ def all_together(i,S,position, phi, r, copy_position, copy_phi, copy_r,
     copy_r = r.copy()
     copy_position = position.copy()
     #un perturb virtual people by speed
-    #for i in range(30):
-    #for t in range(int(3//delta_t),len(t_set)):
     r[int(3//delta_t):,:] = 1.3
     for t in range(int(3//delta_t)):
         r[t,:] = 1.3*ogive(0,0.5,t*delta_t - 1.5)
-    #for t in range(len(t_set)):
     r[:,30]=0
     #un perturb by heading
-    #for i in range(30):
     phi[:,:30] = 0
     return(position, phi, r, copy_position, copy_phi, copy_r, data)
 
@@ -321,15 +318,17 @@ def create_final_speed_heading(position, phi, r, copy_position, copy_phi, copy_r
     #define subset S for experiment 1 Far 12, speed
     S = np.concatenate((np.array([14,15,16,17,27,28,29]),np.array([0,1,2,12,13])))
     position, phi, r, copy_position, copy_phi, copy_r, data3 = all_together(9,S,position, phi, r, copy_position, copy_phi, copy_r, h=False, s =True, data = data3, sign2 =sign3)
-    
+    data3[0,:] = sign3*data3[0,:]
+    if sign3 == -1:
+        data3[1,:] = sign3*data3[1,:] + 2.6
     global y_near_heading_my
     global y_near_speed_my
     global y_far_heading_my
     global y_far_speed_my
-    y_near_heading_my = [data3[0,i] for i in [0,2,3,4,5]]
-    y_far_heading_my = [data3[0,i] for i in [1,6,7,8,9]]
-    y_near_speed_my = [data3[1,i]-0.3 for i in [0,2,3,4,5]]
-    y_far_speed_my = [data3[1,i]-0.3 for i in [1,6,7,8,9]]
+    y_near_heading_my = np.array([data3[0,i] for i in [0,2,3,4,5]])
+    y_far_heading_my = np.array([data3[0,i] for i in [1,6,7,8,9]])
+    y_near_speed_my = np.array([data3[1,i]-0.3 for i in [0,2,3,4,5]])
+    y_far_speed_my = np.array([data3[1,i]-0.3 for i in [1,6,7,8,9]])
     return(y_near_heading_my,y_near_speed_my,y_far_heading_my,y_far_speed_my,data3)
 
 def create_comparison_graph(y_near_heading_my, y_near_speed_my, y_far_heading_my, y_far_speed_my):
@@ -398,10 +397,10 @@ plt.show()
 '''
 
 number = 4
-k_range = np.linspace(200,500,num=number)
-c_range = np.linspace(200,500,num=number)
+k_range = np.linspace(50,240,num=number)
+c_range = np.linspace(300,500,num=number)
 k_matrix = np.vstack((k_range,k_range,k_range,k_range,k_range,k_range))
-c_matrix = np.transpose(k_matrix)
+c_matrix = np.transpose(np.vstack((c_range,c_range,c_range,c_range,c_range,c_range)))
 kc_results_speed = np.zeros((len(k_range),len(c_range)))
 kc_results_direction = np.zeros((len(k_range),len(c_range)))
 print(k_matrix)
@@ -410,7 +409,11 @@ for i in range(number):
     for j in range(number):
         k = k_matrix[i,j]
         c = c_matrix[i,j]
-        y_near_heading_my,y_near_speed_my,y_far_heading_my,y_far_speed_my,my_exp1_final_heading_data = create_final_speed_heading(position, phi, r, copy_position, copy_phi, copy_r, data3=my_exp1_final_heading_data, sign3=1)
+        y_near_heading_my1,y_near_speed_my1,y_far_heading_my1,y_far_speed_my1,my_exp1_final_heading_data1 = create_final_speed_heading(
+            position, phi, r, copy_position, copy_phi, copy_r, data3=my_exp1_final_heading_data, sign3=1)
+        y_near_heading_my2,y_near_speed_my2,y_far_heading_my2,y_far_speed_my2,my_exp1_final_heading_data2 = create_final_speed_heading(
+            position, phi, r, copy_position, copy_phi, copy_r, data3=my_exp1_final_heading_data, sign3=-1)
+        y_near_heading_my,y_near_speed_my,y_far_heading_my,y_far_speed_my,my_exp1_final_heading_data = (y_near_heading_my1+y_near_heading_my2)/2,(y_near_speed_my1+y_near_speed_my2)/2,(y_far_heading_my1+y_far_heading_my2)/2,(y_far_speed_my1+y_far_speed_my2)/2,(my_exp1_final_heading_data1+my_exp1_final_heading_data2)/2
         kc_results_speed[i,j] = similarity_func(y_near_speed_paper, y_near_speed_my, y_far_speed_paper, y_far_speed_my, 
                                                 y_near_heading_paper, y_near_heading_my,y_far_heading_paper,  y_far_heading_my,
                                                 speed = True, heading = False)
